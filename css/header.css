@@ -1,0 +1,110 @@
+/* header.css */
+
+/* Basic navbar styling */
+.navbar {
+    background-color: #ffffff; /* White background for light theme */
+    padding: 15px 0; /* Lebih spacious */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Shadow subtle untuk separasi dari body */
+}
+
+/* Logo styling (left part) */
+.navbar-brand img {
+    height: 45px; /* Sedikit lebih besar untuk visibilitas */
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover img {
+    transform: scale(1.05); /* Hover effect mirip login */
+}
+
+/* Center navigation links */
+.center-nav {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+.center-nav .nav-link {
+    color: #555555; /* Gray lebih soft */
+    margin: 0 20px; /* Spacing lebih lebar */
+    position: relative;
+    text-decoration: none;
+    font-weight: 500; /* Semi-bold untuk profesional */
+    transition: color 0.3s ease;
+}
+
+.center-nav .nav-link:hover {
+    color: #E57229; /* Hover oranye untuk konsistensi */
+}
+
+.center-nav .nav-link.active {
+    color: #000000; /* Black for active link */
+    text-decoration: none;
+}
+
+.center-nav .nav-link.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 100%;
+    height: 2px;
+    background-color: #E57229; /* Orange underline */
+    transition: width 0.3s ease; /* Animasi underline */
+}
+
+/* Right part: Logout button */
+.nav-logout .btn-logout {
+    background-color: #E57229 !important; /* Force override jika ada konflik */
+    color: #ffffff;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.nav-logout .btn-logout:hover {
+    background-color: #d65f1a !important;
+    transform: translateY(-2px);
+}
+
+/* Make the three parts balanced using flex */
+.navbar .container {
+    display: flex;
+    justify-content: space-between; /* Balances left, center, right */
+    align-items: center;
+}
+
+/* Responsive for mobile: Hide center and right, show toggler */
+@media (max-width: 991px) { /* Bootstrap's lg breakpoint */
+    .center-nav,
+    .nav-logout {
+        display: none; /* Hide on mobile until toggled */
+    }
+
+    .navbar-collapse.show .center-nav,
+    .navbar-collapse.show .nav-logout {
+        display: block; /* Show when menu is open */
+        text-align: center; /* Center align in dropdown */
+        margin-top: 20px; /* Lebih spacious */
+    }
+
+    .navbar-collapse.show .nav-link {
+        margin: 20px 0; /* Vertical spacing lebih baik */
+        font-size: 1.1rem; /* Lebih besar di mobile untuk touch */
+    }
+
+    .navbar-collapse.show .nav-logout .btn-logout {
+        margin: 20px auto; /* Centered with more margin */
+        display: block;
+        width: fit-content;
+    }
+
+    .navbar-toggler {
+        border: none; /* Clean toggler */
+        color: #E57229; /* Oranye untuk konsistensi */
+    }
+}

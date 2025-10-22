@@ -1,0 +1,99 @@
+/* profile.css */
+
+/* General styling for the profile container */
+.profile-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    font-family: 'Inter', sans-serif; /* Modern font; assume it's loaded or use system font */
+}
+
+/* Heading styling */
+.profile-container h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: #333333;
+    text-align: center;
+}
+
+/* Form labels */
+.form-label {
+    font-weight: 500;
+    color: #555555;
+    margin-bottom: 8px;
+}
+
+/* Input fields */
+.form-control {
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #E57229 !important; /* Force orange focus */
+    box-shadow: 0 0 0 0.2rem rgba(229, 114, 41, 0.25) !important; /* Soft glow with the specified color */
+    outline: none;
+}
+
+.form-control:disabled {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+/* Button styling - Tambah !important untuk memastikan warna orange tidak ditimpa oleh Bootstrap atau CSS lain */
+.btn-primary {
+    background-color: #E57229 !important;
+    border-color: #E57229 !important;
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 12px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #d65f1a !important; /* Darker shade for hover */
+    border-color: #d65f1a !important;
+    transform: translateY(-2px); /* Subtle lift effect */
+}
+
+.btn-primary:focus {
+    box-shadow: 0 0 0 0.2rem rgba(229, 114, 41, 0.5) !important;
+}
+
+/* Alert styling (if present) */
+.alert {
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .profile-container {
+        padding: 20px;
+        margin: 30px 15px;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+}

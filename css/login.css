@@ -1,0 +1,90 @@
+body {
+    background-color: #ffffff;
+    font-family: 'Roboto', sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+.login-container {
+    display: flex;
+    width: 90%; /* Melebar ke kiri dan kanan, max 90% lebar layar */
+    max-width: 1500px; /* Batas maksimum agar tidak terlalu lebar */
+    height: 80vh;
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 0 auto; /* Pusatkan dengan margin otomatis */
+}
+
+.logo-section {
+    flex: 1;
+    background-color: #ffffff; /* Latar logo putih */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.logo-section img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.form-section {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #E57229; /* Warna orange FILKOM */
+    border-color: #E57229;
+}
+
+.btn-primary:hover {
+    background-color: #c9561f; /* Hover lebih gelap */
+    border-color: #c9561f;
+}
+
+.alert {
+    margin-top: 10px;
+}
+
+input:disabled {
+    background-color: #e9ecef;
+    opacity: 1;
+}
+
+h2.text-center {
+    font-weight: bold;
+    font-size: 32px;
+}
+
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+        height: auto;
+        width: 100%; /* Penuh lebar di HP */
+        margin: 0;
+    }
+    .logo-section,
+    .form-section {
+        flex: none;
+        height: auto;
+    }
+    .logo-section {
+        padding: 20px;
+    }
+    .form-section {
+        padding: 50px;
+    }
+}
