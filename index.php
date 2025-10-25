@@ -1,10 +1,12 @@
 <?php
 require_once 'controllers/AuthController.php';
 require_once 'controllers/ProfileController.php';
+require_once 'controllers/LaporanController.php';
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'login';
 $authController = new AuthController();
 $profileController = new ProfileController($authController->getSessionManager());
+$laporanController = new LaporanController($authController->getSessionManager());
 
 switch ($action) {
     case 'login':
@@ -19,7 +21,7 @@ switch ($action) {
             $message = $result['message'];
             if ($success) {
                 $authController->setRememberMeCookie($email, $authController->getSessionManager()->get('userId'), $remember);
-                header('Location: index.php?action=profile');
+                header('Location: index.php?action=home');
                 return;
             }
         }
@@ -54,8 +56,45 @@ switch ($action) {
             return;
         }
         break;
+    case 'submit_laporan':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $namaBarang = $_POST['nama_barang'] ?? '';
+            $deskripsiFisik = $_POST['deskripsi_fisik'] ?? '';
+            $kategori = $_POST['kategori'] ?? '';
+            $lokasi = $_POST['lokasi'] ?? '';
+            $waktu = $_POST['waktu'] ?? '';
+            $result = $laporanController->submitLaporanHilang($namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu);
+            $success = $result['success'];
+            $message = $result['message'];
+            include 'views/laporan_form.php';
+        } else {
+            header('Location: index.php?action=laporan_form');
+            return;
+        }
+        break;
+    case 'laporan_form':
+        if (!$authController->getSessionManager()->get('userId')) {
+            header('Location: index.php?action=login');
+            return;
+        }
+        $nim = $authController->getSessionManager()->get('nim'); // Ambil nim dari session
+        include 'views/laporan_form.php';
+        break;
+    case 'riwayat_laporan':
+        if (!$authController->getSessionManager()->get('userId')) {
+            header('Location: index.php?action=login');
+            return;
+        }
+        $result = $laporanController->getRiwayatLaporan();
+        $success = $result['success'];
+        $riwayat = $result['riwayat'] ?? [];
+        $message = $result['message'] ?? '';
+        include 'views/riwayat_laporan.php';
+        break;
+    case 'home':
+        include 'views/home.php';
+        break;
     default:
         header('Location: index.php?action=login');
         return;
 }
-?>

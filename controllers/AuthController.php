@@ -56,11 +56,13 @@ class AuthController
         // Cek login via model
         $user = $this->model->login($email, $password);
         if ($user) {
+            // Ambil profil untuk mendapatkan nomor_induk
+            $profil = $this->model->getProfil($user['id_akun']);
             // Set session via wrapper
             $this->session->set('userId', $user['id_akun']);
             $this->session->set('nama', $user['nama']);
             $this->session->set('role', $user['role']);
-
+            $this->session->set('nim', $profil['nomor_induk'] ?? ''); // Ambil nim dari profil
             return ['success' => true, 'message' => 'Login berhasil'];
         }
         return ['success' => false, 'message' => 'Email atau password salah'];

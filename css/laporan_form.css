@@ -1,0 +1,151 @@
+/* Impor font Plus Jakarta Sans */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap');
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    background-color: #ffffff;
+    color: #1C1C1C;
+}
+
+.report-layout {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.input-section {
+    background-color: #ffffff;
+    border: 1px solid #E0E0E0;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.image-upload-section {
+    text-align: center;
+}
+
+.image-upload-section .form-label {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1C1C1C;
+    margin-bottom: 10px;
+}
+
+.image-upload-section .form-control {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 400;
+    border: 1px solid #E0E0E0;
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Styling khusus untuk konten kanan (form-wrapper) */
+.form-wrapper {
+    margin: 50px; /* Margin 50px terhadap border dalam .input-section */
+}
+
+.form-section {
+    padding: 0; /* Reset padding agar margin 50px dominan */
+}
+
+.report-form {
+    max-width: 100%;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1C1C1C;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.required {
+    color: #ff0000;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+.form-control {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 400;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.form-control:focus {
+    border-color: #E57229;
+    box-shadow: 0 0 5px rgba(229, 114, 41, 0.5);
+}
+
+.form-select {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 400;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.form-select:focus {
+    border-color: #E57229;
+    box-shadow: 0 0 5px rgba(229, 114, 41, 0.5);
+}
+
+/* Pastikan .btn-submit meng-override gaya Bootstrap */
+.btn-submit {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    background-color: #E57229 !important; /* Prioritas tinggi */
+    border-color: #E57229 !important; /* Prioritas tinggi */
+    color: #fff !important; /* Prioritas tinggi */
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    border-radius: 5px;
+    width: 100%;
+    display: block;
+    transition: background-color 0.3s, border-color 0.3s; /* Efek transisi halus */
+}
+
+.btn-submit:hover {
+    background-color: #D65B1F !important; /* Hover lebih gelap */
+    border-color: #D65B1F !important;
+}
+
+/* Responsivitas */
+@media (max-width: 768px) {
+    .image-upload-section,
+    .form-section {
+        padding: 15px;
+    }
+
+    .report-layout .col-md-4,
+    .report-layout .col-md-8 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .form-wrapper {
+        margin: 20px; /* Kurangi margin di mobile */
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .btn-submit {
+        font-size: 1rem;
+    }
+}

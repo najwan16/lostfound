@@ -1,0 +1,108 @@
+/* Impor font Plus Jakarta Sans dari Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap');
+
+/* Styling untuk layout dua kolom */
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    background-color: #fff;
+    /* Latar belakang putih untuk kontras */
+}
+
+.home-layout {
+    min-height: 70vh;
+    /* Tinggi minimum untuk layout */
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Styling kolom */
+.home-layout .col-md-6 {
+    padding: 20px;
+}
+
+/* Styling teks di kiri */
+.home-layout h1 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    /* Bold */
+    font-size: 4rem;
+    color: #1C1C1C;
+}
+
+.home-layout .lead {
+    margin-top: 28px;
+
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 400;
+    /* Regular */
+    font-size: 1.5rem;
+    color: #1C1C1C;
+    margin-bottom: 28px;
+    /* Jarak 28px ke bawah */
+}
+
+/* Styling tombol */
+.home-layout .btn {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+}
+
+.home-layout .btn-lg {
+    padding: 12px 30px;
+    /* Padding vertikal 12px untuk total tinggi ~64px */
+    font-size: 1.1rem;
+    height: 64px;
+    /* Tinggi tombol sesuai Figma */
+    line-height: 40px;
+    /* Sesuaikan line-height agar teks tengah */
+    background-color: #E57229;
+    /* Warna orange sesuai permintaan */
+    border-color: #E57229;
+    color: #fff;
+    /* Teks putih untuk kontras */
+}
+
+.home-layout .btn-lg:hover {
+    background-color: #D65B1F;
+    /* Warna hover lebih gelap */
+    border-color: #D65B1F;
+}
+
+/* Styling gambar di kanan */
+.home-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.underline-orange {
+    border-bottom: 7px solid #E57229;
+    display: inline-block;
+}
+
+/* Responsivitas */
+@media (max-width: 768px) {
+    .home-layout .col-md-6 {
+        text-align: center;
+    }
+
+    .home-layout h1 {
+        font-size: 2rem;
+    }
+
+    .home-layout .lead {
+        font-size: 1rem;
+    }
+
+    .home-image {
+        margin-top: 20px;
+    }
+}
+
+/* Penyesuaian untuk align-items-start */
+.home-layout {
+    align-items: flex-start;
+    /* Konten kiri menempel ke atas */
+}
