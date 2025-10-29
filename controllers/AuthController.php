@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../models/AkunModel.php';
-
 use Models\AkunModel;
 
 class SessionManager
@@ -11,22 +10,9 @@ class SessionManager
             session_start();
         }
     }
-
-    public function set($key, $value)
-    {
-        $_SESSION[$key] = $value;
-    }
-
-    public function get($key)
-    {
-        return isset($_SESSION[$key]) ? $_SESSION[$key] : null;
-    }
-
-    public function destroy()
-    {
-        session_unset();
-        session_destroy();
-    }
+    public function set($key, $value) { $_SESSION[$key] = $value; }
+    public function get($key) { return $_SESSION[$key] ?? null; }
+    public function destroy() { session_unset(); session_destroy(); }
 }
 
 class AuthController
@@ -41,31 +27,36 @@ class AuthController
         $this->session->start();
     }
 
-    public function getSessionManager()
-    {
-        return $this->session;
-    }
+    public function getSessionManager() { return $this->session; }
 
+    // PERBAIKAN UTAMA: Login + Return Role
     public function login($email, $password)
     {
-        // Validasi email UB
-        if (!str_ends_with($email, '@ub.ac.id') && !str_ends_with($email, '@student.ub.ac.id')) {
-            return ['success' => false, 'message' => 'Gunakan email UB (@ub.ac.id atau @student.ub.ac.id)'];
-        }
+        $user = $this->model->getUserByEmail($email);
 
-        // Cek login via model
-        $user = $this->model->login($email, $password);
-        if ($user) {
-            // Ambil profil untuk mendapatkan nomor_induk
-            $profil = $this->model->getProfil($user['id_akun']);
-            // Set session via wrapper
+        if ($user && password_verify($password, $user['password'])) {
+            // Simpan session
             $this->session->set('userId', $user['id_akun']);
             $this->session->set('nama', $user['nama']);
             $this->session->set('role', $user['role']);
-            $this->session->set('nim', $profil['nomor_induk'] ?? ''); // Ambil nim dari profil
-            return ['success' => true, 'message' => 'Login berhasil'];
+
+            // Jika civitas, ambil NIM
+            if ($user['role'] === 'civitas') {
+                $profil = $this->model->getProfil($user['id_akun']);
+                $this->session->set('nim', $profil['nomor_induk'] ?? '');
+            }
+
+            return [
+                'success' => true,
+                'role' => $user['role'],
+                'message' => 'Login berhasil'
+            ];
         }
-        return ['success' => false, 'message' => 'Email atau password salah'];
+
+        return [
+            'success' => false,
+            'message' => 'Email atau password salah'
+        ];
     }
 
     public function setRememberMeCookie($email, $userId, $remember)
@@ -78,13 +69,10 @@ class AuthController
 
     public function logout()
     {
-        // Hapus session dan cookie
         $this->session->destroy();
         setcookie('user_email', '', time() - 3600, "/");
         setcookie('user_id', '', time() - 3600, "/");
-
-        // Redirect tanpa exit
-        header('Location: ../index.php');
-        return;
+        header('Location: index.php');
+        exit;
     }
 }

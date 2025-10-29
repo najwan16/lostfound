@@ -16,31 +16,26 @@ class LaporanController
 
     public function submitLaporanHilang($namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu)
     {
-        // Validasi data (sesuai pseudo-code: reportValid)
-        if (empty($namaBarang) || empty($kategori) || empty($waktu)) {
-            return ['success' => false, 'message' => 'Formulir tidak lengkap, lengkapi nama barang, kategori, dan waktu'];
+        if (empty($namaBarang) || empty($deskripsiFisik) || empty($kategori) || empty($lokasi) || empty($waktu)) {
+            return ['success' => false, 'message' => 'Semua field wajib diisi'];
         }
 
-        // Ambil id_akun dari session (civitas harus login)
         $idAkun = $this->session->get('userId');
         if (!$idAkun || $this->session->get('role') !== 'civitas') {
             return ['success' => false, 'message' => 'Anda harus login sebagai civitas untuk melaporkan'];
         }
 
-        // Simpan via model
         $result = $this->model->simpanLaporanHilang($idAkun, $namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu);
         return $result;
     }
 
     public function getRiwayatLaporan()
     {
-        // Check session dan role
         $idAkun = $this->session->get('userId');
         if (!$idAkun || $this->session->get('role') !== 'civitas') {
             return ['success' => false, 'message' => 'Anda harus login sebagai civitas untuk melihat riwayat'];
         }
 
-        // Ambil data dari model
         $riwayat = $this->model->getRiwayatLaporan($idAkun);
         if (empty($riwayat)) {
             return ['success' => true, 'riwayat' => [], 'message' => 'Tidak ada riwayat laporan'];

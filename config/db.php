@@ -1,13 +1,12 @@
 <?php
 
-// Konfigurasi DB (ganti kalau beda)
 $host = 'localhost';
 $dbname = 'lostfound';
 $username = 'root';
-$password = '';  // Kosong kalau default XAMPP
+$password = '';
 
 try {
-    // Koneksi PDO dengan error handling
+
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -15,8 +14,8 @@ try {
     die("Koneksi DB gagal: " . $e->getMessage());
 }
 
-// Fungsi untuk ambil PDO (dipanggil di model)
-function getDB() {
+function getDB()
+{
     global $pdo;
     return $pdo;
 }

@@ -1,16 +1,20 @@
 <?php
+
 namespace Models;
 
 require_once __DIR__ . '/../config/db.php';
 
-class AkunModel {
+class AkunModel
+{
     private $database;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->database = getDB();
     }
 
-    public function login($email, $password) {
+    public function login($email, $password)
+    {
         error_log("Login attempt: email=$email");
         $stmt = $this->database->prepare("SELECT * FROM akun WHERE email = :email");
         $stmt->execute(['email' => $email]);
@@ -25,7 +29,8 @@ class AkunModel {
         return false;
     }
 
-    public function getProfil($idAkun) {
+    public function getProfil($idAkun)
+    {
         $stmt = $this->database->prepare("SELECT a.*, c.nomor_induk FROM akun a LEFT JOIN civitas c ON a.id_akun = c.id_akun WHERE a.id_akun = :id");
         $stmt->execute(['id' => $idAkun]);
         $profil = $stmt->fetch();
@@ -33,7 +38,8 @@ class AkunModel {
         return $profil;
     }
 
-    public function updateProfil($idAkun, $nama, $nomorKontak) {
+    public function updateProfil($idAkun, $nama, $nomorKontak)
+    {
         $stmt = $this->database->prepare("UPDATE akun SET nama = :nama, nomor_kontak = :nomorKontak WHERE id_akun = :id");
         return $stmt->execute([
             'nama' => $nama,
@@ -41,4 +47,11 @@ class AkunModel {
             'id' => $idAkun
         ]);
     }
+
+    public function getUserByEmail($email)
+    {
+        $stmt = $this->database->prepare("SELECT * FROM akun WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch();
+    }       
 }
