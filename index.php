@@ -228,7 +228,6 @@ switch ($action) {
             $success = $result['success'];
             $message = $result['message'];
             include 'views/laporan_form.php';
-            
         }
         break;
     case 'search_page':
@@ -248,6 +247,40 @@ switch ($action) {
             exit;
         }
         include 'views/admin/dashboard.php';
+        break;
+
+    case 'laporan_ditemukan_form':
+        if ($sessionManager->get('role') !== 'satpam') {
+            header('Location: index.php?action=login');
+            exit;
+        }
+        include 'views/admin/laporan_ditemukan_form.php';
+        break;
+
+    case 'submit_laporan_ditemukan':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $sessionManager->get('role') === 'satpam') {
+            $namaBarang = trim($_POST['nama_barang'] ?? '');
+            $deskripsiFisik = trim($_POST['deskripsi_fisik'] ?? '');
+            $kategori = $_POST['kategori'] ?? '';
+            $lokasi = $_POST['lokasi'] ?? '';
+            $waktu = $_POST['waktu'] ?? '';
+
+            $result = $laporanController->submitLaporanDitemukan(
+                $namaBarang,
+                $deskripsiFisik,
+                $kategori,
+                $lokasi,
+                $wakt
+            );
+
+            // Redirect dengan pesan
+            $msg = $result['success'] ? 'success' : 'error';
+            header("Location: index.php?action=laporan_ditemukan_form&msg=$msg");
+            exit;
+        }
+        // Jika bukan POST, redirect ke form
+        header('Location: index.php?action=laporan_ditemukan_form');
+        exit;
         break;
 
     // ==================================================================

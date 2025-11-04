@@ -108,4 +108,27 @@ class LaporanController
         $laporan = $this->model->getRiwayatLaporan($idAkun);
         return ['success' => true, 'laporan' => $laporan];
     }
+
+    public function submitLaporanDitemukan($namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu)
+    {
+        if (empty($namaBarang) || empty($deskripsiFisik) || empty($kategori) || empty($lokasi) || empty($waktu)) {
+            return ['success' => false, 'message' => 'Semua field wajib diisi'];
+        }
+
+        $idAkun = $this->session->get('userId');
+        if (!$idAkun || $this->session->get('role') !== 'satpam') {
+            return ['success' => false, 'message' => 'Akses ditolak'];
+        }
+
+        $result = $this->model->simpanLaporanDitemukan(
+            $idAkun,
+            $namaBarang,
+            $deskripsiFisik,
+            $kategori,
+            $lokasi,
+            $waktu
+        );
+
+        return $result;
+    }
 }

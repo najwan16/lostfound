@@ -93,4 +93,27 @@ class LaporanModel
             return [];
         }
     }
+
+    public function simpanLaporanDitemukan($idAkun, $namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu)
+    {
+        try {
+            $stmt = $this->database->prepare("
+            INSERT INTO laporan 
+            (id_akun, tipe_laporan, nama_barang, deskripsi_fisik, kategori, lokasi, waktu, status)
+            VALUES (:id_akun, 'ditemukan', :nama_barang, :deskripsi_fisik, :kategori, :lokasi, :waktu, 'ditemukan')
+        ");
+            $stmt->execute([
+                'id_akun' => $idAkun,
+                'nama_barang' => $namaBarang,
+                'deskripsi_fisik' => $deskripsiFisik,
+                'kategori' => $kategori,
+                'lokasi' => $lokasi,
+                'waktu' => $waktu
+            ]);
+            return ['success' => true, 'message' => 'Laporan barang ditemukan berhasil disimpan'];
+        } catch (\PDOException $e) {
+            error_log("Error simpan laporan ditemukan: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Gagal menyimpan laporan'];
+        }
+    }
 }

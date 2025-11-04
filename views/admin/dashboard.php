@@ -140,8 +140,12 @@ $root = dirname(__DIR__, 2);
                     </div>
                 <?php endif; ?>
 
+                <!-- TOMBOL AKSI -->
                 <div class="text-center mt-4">
-                    <a href="/logout.php" class="btn btn-outline-danger">Logout</a>
+                    <a href="index.php?action=laporan_ditemukan_form" class="btn btn-success btn-lg me-3">
+                        Lapor Barang Ditemukan
+                    </a>
+                    <a href="/logout.php" class="btn btn-outline-danger btn-lg">Logout</a>
                 </div>
             </div>
         </div>
