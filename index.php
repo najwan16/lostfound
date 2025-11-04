@@ -197,6 +197,11 @@ switch ($action) {
     // ==================================================================
     // LAPORAN
     // ==================================================================
+    case 'laporan':
+        $nim = $sessionManager->get('nim');
+        include 'views/laporan_page.php';
+        break;
+
     case 'laporan_form':
         $nim = $sessionManager->get('nim');
         include 'views/laporan_form.php';
@@ -204,26 +209,28 @@ switch ($action) {
 
     case 'submit_laporan':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            echo '<pre>';
+            print_r($_FILES);
+            echo '</pre>';
             $namaBarang = trim($_POST['nama_barang'] ?? '');
             $deskripsiFisik = trim($_POST['deskripsi_fisik'] ?? '');
             $kategori = trim($_POST['kategori'] ?? '');
             $lokasi = trim($_POST['lokasi'] ?? '');
             $waktu = trim($_POST['waktu'] ?? '');
+            $file = $_FILES['foto'] ?? null; // PASTIKAN NAMA SAMA
 
-            if (empty($namaBarang) || empty($deskripsiFisik) || empty($kategori) || empty($lokasi) || empty($waktu)) {
-                $success = false;
-                $message = 'Semua field wajib diisi';
-                include 'views/laporan_form.php';
-                break;
-            }
+            $result = $laporanController->submitLaporanHilang(
+                $namaBarang,
+                $deskripsiFisik,
+                $kategori,
+                $lokasi,
+                $waktu,
+                $file
+            );
 
-            $result = $laporanController->submitLaporanHilang($namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu);
             $success = $result['success'];
             $message = $result['message'];
             include 'views/laporan_form.php';
-        } else {
-            header('Location: index.php?action=laporan_form');
-            exit;
         }
         break;
 
@@ -254,9 +261,9 @@ switch ($action) {
         header('Location: index.php?action=home');
         exit;
 
-    // ==================================================================
-    // DEFAULT: ke home
-    // ==================================================================
+        // ==================================================================
+        // DEFAULT: ke home
+        // ==================================================================
     default:
         header('Location: index.php?action=home');
         exit;

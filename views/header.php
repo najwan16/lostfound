@@ -30,7 +30,7 @@
 
                         <a class="nav-link <?php echo $currentPage === 'search_page' ? 'active' : ''; ?>" href="../index.php?action=search_page">Cari</a>
 
-                        <a class="nav-link <?php echo $currentPage === 'laporan_form' ? 'active' : ''; ?>" href="../index.php?action=laporan_form">Laporan</a>
+                        <a class="nav-link <?php echo $currentPage === 'laporan' ? 'active' : ''; ?>" href="../index.php?action=laporan">Laporan</a>
                         <a class="nav-link <?php echo $currentPage === 'profile' ? 'active' : ''; ?>" href="../index.php?action=profile">Profil</a>
                     <?php else: ?>
                         <a class="nav-link <?php echo $currentPage === 'search_page' ? 'active' : ''; ?>" href="../index.php?action=search_page">Cari</a>
@@ -40,9 +40,9 @@
 
                 <div class="nav-logout ms-auto">
                     <?php if ($controller->getSessionManager()->get('userId')): ?>
-                        <a class="btn btn-outline-danger btn-logout" href="../logout.php">Logout</a>
+                        <a class="btn btn-outline-danger btn-logout" href="../logout.php">Keluar</a>
                     <?php else: ?>
-                        <a class="btn btn-outline-primary btn-logout" href="../index.php?action=login">Login</a>
+                        <a class="btn btn-outline-primary btn-logout" href="../index.php?action=login">Masuk</a>
                     <?php endif; ?>
                 </div>
             </div>

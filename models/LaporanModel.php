@@ -1,4 +1,5 @@
 <?php
+
 namespace Models;
 
 require_once __DIR__ . '/../config/db.php';
@@ -12,10 +13,9 @@ class LaporanModel
         $this->database = getDB();
     }
 
-    public function simpanLaporanHilang($idAkun, $namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu)
+    public function simpanLaporanHilang($idAkun, $namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu, $fotoPath = null)
     {
         try {
-            // Daftar opsi ENUM untuk validasi
             $validLokasi = [
                 'Smart Class Gedung F',
                 'Junction',
@@ -31,21 +31,21 @@ class LaporanModel
                 'Mushola Ulul Al-Baab',
                 'auditorium algoritma'
             ];
-
-            // Validasi lokasi
             $lokasi = in_array($lokasi, $validLokasi) ? $lokasi : null;
 
             $stmt = $this->database->prepare("
-                INSERT INTO laporan (id_akun, tipe_laporan, nama_barang, deskripsi_fisik, kategori, lokasi, waktu, status)
-                VALUES (:id_akun, 'hilang', :nama_barang, :deskripsi_fisik, :kategori, :lokasi, :waktu, 'belum_ditemukan')
-            ");
+            INSERT INTO laporan 
+            (id_akun, tipe_laporan, nama_barang, deskripsi_fisik, kategori, lokasi, waktu, status, foto)
+            VALUES (:id_akun, 'hilang', :nama_barang, :deskripsi_fisik, :kategori, :lokasi, :waktu, 'belum_ditemukan', :foto)
+        ");
             $stmt->execute([
                 'id_akun' => $idAkun,
                 'nama_barang' => $namaBarang,
                 'deskripsi_fisik' => $deskripsiFisik,
                 'kategori' => $kategori,
                 'lokasi' => $lokasi,
-                'waktu' => $waktu
+                'waktu' => $waktu,
+                'foto' => $fotoPath
             ]);
             return ['success' => true, 'message' => 'Laporan berhasil disimpan'];
         } catch (\PDOException $e) {
@@ -66,6 +66,30 @@ class LaporanModel
             return $stmt->fetchAll();
         } catch (\PDOException $e) {
             error_log("Error fetching riwayat: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getAllLaporanHilang()
+    {
+        try {
+            $stmt = $this->database->prepare("
+                SELECT  id_laporan,
+                        nama_barang,
+                        deskripsi_fisik,
+                        kategori,
+                        lokasi,
+                        waktu,
+                        status,
+                        foto
+                FROM laporan
+                WHERE tipe_laporan = 'hilang'
+                ORDER BY created_at DESC
+            ");
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (\PDOException $e) {
+            error_log('LaporanModel::getAllLaporanHilang – ' . $e->getMessage());
             return [];
         }
     }

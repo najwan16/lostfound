@@ -20,7 +20,7 @@
                 <?php if ($controller->getSessionManager()->get('userId')): ?>
                     <a href="../index.php?action=laporan_form" class="btn btn-primary btn-lg">Laporkan Sekarang</a>
                 <?php else: ?>
-                    <a href="../index.php?action=login" class="btn btn-primary btn-lg">Login untuk Melapor</a>
+                    <a href="../index.php?action=login" class="btn btn-primary btn-lg">Masuk untuk Melapor</a>
                 <?php endif; ?>
             </div>
             <div class="col-md-6">

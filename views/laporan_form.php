@@ -22,15 +22,18 @@
                 <div class="col-md-4">
                     <div class="input-section">
                         <div class="form-group">
-                            <label for="nim_pemilik">Nomor Induk Pemilik Laporan (NIM/NIP)</label>
-                            <input type="text" class="form-control" id="nim_pemilik" name="nim_pemilik" value="<?php echo htmlspecialchars($nim ?? ''); ?>" disabled>
+                            <label for="foto">Foto Barang</label>
+                            <input type="file" class="form-control" id="foto" name="foto" accept="image/*" onchange="previewImage(event)">
+                            <div id="image-preview" class="mt-2" style="max-height:200px; overflow:hidden; border-radius:8px; display:none;">
+                                <img id="preview-img" src="" alt="Preview" style="width:100%; height:auto;">
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-8">
                     <div class="input-section">
                         <div class="form-wrapper">
-                            <form method="POST" action="../index.php?action=submit_laporan" class="report-form">
+                            <form method="POST" action="index.php?action=submit_laporan" class="report-form" enctype="multipart/form-data">
                                 <div class="form-group">
                                     <label for="nama_barang">Nama Barang<span class="required">*</span></label>
                                     <input type="text" class="form-control" id="nama_barang" name="nama_barang" placeholder="Contoh: Laptop Dell" required>
@@ -83,5 +86,23 @@
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+<script>
+    function previewImage(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('image-preview');
+        const img = document.getElementById('preview-img');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+</script>
 
 </html>
