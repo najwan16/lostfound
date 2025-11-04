@@ -38,7 +38,7 @@
                             <i class="bi bi-list-ul"></i> Semua Laporan
                         </button>
                         <hr class="filter-divider">
-                        <button class="filter-btn" data-filter="belum_selesai">
+                        <button class="filter-btn" data-filter="belum_ditemukan">
                             <i class="bi bi-hourglass-split"></i> Belum Selesai
                         </button>
                         <button class="filter-btn" data-filter="selesai">
@@ -51,14 +51,26 @@
                 <div class="col-lg-9 col-md-8">
                     <?php
                     // -------------------------------------------------
-                    // 1. Ambil data dari DB
+                    // 1. Ambil data dari DB - HANYA MILIK USER
                     // -------------------------------------------------
-                    require_once __DIR__ . '/../models/LaporanModel.php';
-                    $model = new \Models\LaporanModel();
-                    $laporanList = $model->getAllLaporanHilang();
+                    $result = $laporanController->getLaporanUser();
 
-                    // 2. Include widget (filter akan di-handle JS)
+                    if (!$result['success']) {
+                        echo '<div class="alert alert-warning">' . $result['message'] . '</div>';
+                        $laporanList = [];
+                    } else {
+                        $laporanList = $result['laporan'];
+                    }
+
+                    // Filter dari URL
+                    $filter = $_GET['filter'] ?? 'semua';
+                    $validFilters = ['semua', 'belum_ditemukan', 'selesai'];
+                    if (!in_array($filter, $validFilters)) $filter = 'semua';
+
+                    // Include widget
+                    ob_start();
                     include __DIR__ . '/widgets/laporan_widget.php';
+                    echo ob_get_clean();
                     ?>
                 </div>
             </div>
@@ -72,19 +84,19 @@
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
 
-                const filter = this.dataset.filter; // semua | belum_selesai | selesai
+                const filter = this.dataset.filter;
                 const url = new URL(window.location);
                 url.searchParams.set('filter', filter);
                 history.replaceState(null, '', url);
 
-                // Render ulang widget via AJAX (lebih cepat)
-                fetch(`../api/laporan_widget.php?filter=${filter}`)
+                // Render ulang widget via AJAX
+                fetch(`../api/laporan_widget.php?filter=${filter}&user_only=1`)
                     .then(r => r.text())
                     .then(html => document.getElementById('laporan-container').parentElement.innerHTML = html);
             });
         });
 
-        // Jika ada parameter ?filter di URL, aktifkan tombol yang sesuai
+        // Aktifkan filter dari URL
         const urlParams = new URLSearchParams(window.location.search);
         const urlFilter = urlParams.get('filter') || 'semua';
         document.querySelector(`.filter-btn[data-filter="${urlFilter}"]`)?.click();

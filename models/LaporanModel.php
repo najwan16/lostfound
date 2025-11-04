@@ -57,11 +57,11 @@ class LaporanModel
     {
         try {
             $stmt = $this->database->prepare("
-                SELECT id_laporan, nama_barang, kategori, lokasi, waktu, status, created_at
-                FROM laporan
-                WHERE id_akun = :id_akun AND tipe_laporan = 'hilang'
-                ORDER BY created_at DESC
-            ");
+            SELECT id_laporan, nama_barang, kategori, lokasi, waktu, status, foto, created_at
+            FROM laporan
+            WHERE id_akun = :id_akun AND tipe_laporan = 'hilang'
+            ORDER BY created_at DESC
+        ");
             $stmt->execute(['id_akun' => $idAkun]);
             return $stmt->fetchAll();
         } catch (\PDOException $e) {

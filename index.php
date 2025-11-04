@@ -209,15 +209,12 @@ switch ($action) {
 
     case 'submit_laporan':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            echo '<pre>';
-            print_r($_FILES);
-            echo '</pre>';
             $namaBarang = trim($_POST['nama_barang'] ?? '');
             $deskripsiFisik = trim($_POST['deskripsi_fisik'] ?? '');
             $kategori = trim($_POST['kategori'] ?? '');
             $lokasi = trim($_POST['lokasi'] ?? '');
             $waktu = trim($_POST['waktu'] ?? '');
-            $file = $_FILES['foto'] ?? null; // PASTIKAN NAMA SAMA
+            $file = $_FILES['foto'] ?? null;
 
             $result = $laporanController->submitLaporanHilang(
                 $namaBarang,
@@ -231,9 +228,9 @@ switch ($action) {
             $success = $result['success'];
             $message = $result['message'];
             include 'views/laporan_form.php';
+            
         }
         break;
-
     case 'search_page':
         $result = $laporanController->getRiwayatLaporan();
         $riwayat = $result['riwayat'] ?? [];

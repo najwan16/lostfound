@@ -28,34 +28,47 @@ class LaporanController
 
         $fotoPath = null;
 
-        // 2. PROSES UPLOAD GAMBAR (URUTAN BENAR)
+        // 2. PROSES UPLOAD GAMBAR
         if ($file && $file['error'] === UPLOAD_ERR_OK) {
 
-            // CEK UKURAN DULU (SEBELUM PINDAH FILE)
+            // Validasi ukuran (max 2MB)
             if ($file['size'] > 2 * 1024 * 1024) {
                 return ['success' => false, 'message' => 'Ukuran gambar maksimal 2MB'];
             }
 
-            $uploadDir = __DIR__ . '/../../uploads/laporan/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-
+            // Validasi ekstensi
             $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
             $allowed = ['jpg', 'jpeg', 'png', 'gif'];
             if (!in_array($ext, $allowed)) {
                 return ['success' => false, 'message' => 'Format gambar tidak didukung. Gunakan JPG, PNG, atau GIF'];
             }
 
-            $newName = 'laporan_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
+            // Direktori upload
+            $uploadDir = __DIR__ . '/../uploads/laporan/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            // --- BERSIHKAN NAMA + TAMBAHKAN ID USER ---
+            $cleanName = preg_replace('/[^a-zA-Z0-9\s\-]/', '', $namaBarang);
+            $cleanName = preg_replace('/\s+/', '-', trim($cleanName));
+            $cleanName = strtolower($cleanName);
+            $cleanName = substr($cleanName, 0, 30);
+            $cleanName = rtrim($cleanName, '-');
+            if (empty($cleanName)) $cleanName = 'barang';
+
+            $date = date('Ymd');
+            $random = rand(1000, 9999);
+
+            $newName = "laporan_{$idAkun}_{$cleanName}_{$date}_{$random}.{$ext}";
+            // --- AKHIR ---
+
             $destination = $uploadDir . $newName;
 
-            // BARU PINDAHKAN FILE
+            // Upload file
             if (move_uploaded_file($file['tmp_name'], $destination)) {
                 $fotoPath = 'uploads/laporan/' . $newName;
-                error_log("File uploaded to: $destination"); // cek di error.log
             } else {
-                error_log("Failed to move file. Error: " . $file['error']);
                 return ['success' => false, 'message' => 'Gagal mengunggah gambar ke server'];
             }
         }
@@ -83,5 +96,16 @@ class LaporanController
 
         $riwayat = $this->model->getRiwayatLaporan($idAkun);
         return ['success' => true, 'riwayat' => $riwayat];
+    }
+
+    public function getLaporanUser()
+    {
+        $idAkun = $this->session->get('userId');
+        if (!$idAkun || $this->session->get('role') !== 'civitas') {
+            return ['success' => false, 'message' => 'Login diperlukan'];
+        }
+
+        $laporan = $this->model->getRiwayatLaporan($idAkun);
+        return ['success' => true, 'laporan' => $laporan];
     }
 }
