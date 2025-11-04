@@ -2,17 +2,43 @@
 <?php
 require_once 'config/db.php';
 
+// Ambil filter dan parameter pencarian
 $filter = $_GET['filter'] ?? 'semua';
 $allowed = ['semua', 'hilang', 'ditemukan'];
 $filter = in_array($filter, $allowed) ? $filter : 'semua';
 
-$where = '';
+$keyword = trim($_GET['keyword'] ?? '');
+$kategori = $_GET['kategori'] ?? '';
+$lokasi = $_GET['lokasi'] ?? '';
+
+// Bangun kondisi WHERE
+$where = [];
+$params = [];
+
 if ($filter === 'hilang') {
-    $where = "WHERE l.tipe_laporan = 'hilang'";
+    $where[] = "l.tipe_laporan = 'hilang'";
 } elseif ($filter === 'ditemukan') {
-    $where = "WHERE l.tipe_laporan = 'ditemukan'";
+    $where[] = "l.tipe_laporan = 'ditemukan'";
 }
 
+if ($keyword !== '') {
+    $where[] = "(l.nama_barang LIKE :keyword OR l.deskripsi_fisik LIKE :keyword)";
+    $params[':keyword'] = "%$keyword%";
+}
+
+if ($kategori !== '') {
+    $where[] = "l.kategori = :kategori";
+    $params[':kategori'] = $kategori;
+}
+
+if ($lokasi !== '') {
+    $where[] = "l.lokasi = :lokasi";
+    $params[':lokasi'] = $lokasi;
+}
+
+$whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+// Query
 $query = "
     SELECT 
         l.tipe_laporan, l.nama_barang, l.deskripsi_fisik, l.kategori, 
@@ -21,13 +47,31 @@ $query = "
     FROM laporan l
     JOIN akun a ON l.id_akun = a.id_akun
     LEFT JOIN civitas c ON a.id_akun = c.id_akun
-    $where
+    $whereClause
     ORDER BY l.created_at DESC
 ";
 
 $stmt = getDB()->prepare($query);
-$stmt->execute();
+$stmt->execute($params);
 $laporan_list = $stmt->fetchAll();
+
+// Daftar kategori & lokasi
+$categories = ['elektronik', 'dokumen', 'pakaian', 'lainnya'];
+$locations = [
+    'Area Parkir',
+    'auditorium algoritma',
+    'EduTech',
+    'Gazebo lantai 4',
+    'Gedung Kreativitas Mahasiswa (GKM)',
+    'Junction',
+    'kantin',
+    'Laboratorium Pembelajaran',
+    'Mushola Ulul Al-Baab',
+    'Ruang Baca',
+    'Ruang Ujian',
+    'ruang tunggu',
+    'Smart Class Gedung F'
+];
 ?>
 
 <!DOCTYPE html>
@@ -39,59 +83,8 @@ $laporan_list = $stmt->fetchAll();
     <title>Cari Laporan - Lost & Found FILKOM UB</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background: #f8f9fa;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        .card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .header {
-            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 16px 16px 0 0;
-            text-align: center;
-        }
-
-        .filter-btn {
-            margin: 0.5rem;
-        }
-
-        .table th {
-            background-color: #e3f2fd;
-            font-weight: 600;
-        }
-
-        .badge-tipe {
-            font-size: 0.8rem;
-        }
-
-        .pembuat {
-            font-size: 0.9rem;
-            color: #555;
-        }
-
-        .nim {
-            font-weight: bold;
-            color: #1e40af;
-        }
-
-        .status-hilang {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .status-ditemukan {
-            background-color: #d1edff;
-            color: #0c5460;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="../css/search.css" rel="stylesheet">
 </head>
 
 <body>
@@ -105,18 +98,53 @@ $laporan_list = $stmt->fetchAll();
             </div>
 
             <div class="card-body p-4">
+                <!-- FORM PENCARIAN -->
+                <form method="GET" action="index.php" class="search-form mb-4">
+                    <input type="hidden" name="action" value="search_page">
+                    <input type="hidden" name="filter" value="<?= $filter ?>">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" name="keyword" class="form-control" placeholder="Nama barang / deskripsi" value="<?= htmlspecialchars($keyword) ?>">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="kategori" class="form-select">
+                                <option value="">Semua Kategori</option>
+                                <?php foreach ($categories as $cat): ?>
+                                    <option value="<?= $cat ?>" <?= $kategori === $cat ? 'selected' : '' ?>><?= ucfirst($cat) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="lokasi" class="form-select">
+                                <option value="">Semua Lokasi</option>
+                                <?php foreach ($locations as $loc): ?>
+                                    <option value="<?= $loc ?>" <?= $lokasi === $loc ? 'selected' : '' ?>><?= $loc ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">Cari</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- TOMBOL FILTER TIPE -->
                 <div class="text-center mb-4">
-                    <a href="index.php?action=search_page&filter=semua"
+                    <?php
+                    $currentParams = ['keyword' => $keyword, 'kategori' => $kategori, 'lokasi' => $lokasi];
+                    ?>
+                    <a href="index.php?action=search_page&filter=semua&<?= http_build_query($currentParams) ?>"
                         class="btn btn-outline-primary filter-btn <?= $filter === 'semua' ? 'active' : '' ?>">Semua</a>
-                    <a href="index.php?action=search_page&filter=hilang"
+                    <a href="index.php?action=search_page&filter=hilang&<?= http_build_query($currentParams) ?>"
                         class="btn btn-outline-warning filter-btn <?= $filter === 'hilang' ? 'active' : '' ?>">Barang Hilang</a>
-                    <a href="index.php?action=search_page&filter=ditemukan"
+                    <a href="index.php?action=search_page&filter=ditemukan&<?= http_build_query($currentParams) ?>"
                         class="btn btn-outline-success filter-btn <?= $filter === 'ditemukan' ? 'active' : '' ?>">Barang Ditemukan</a>
                 </div>
 
+                <!-- HASIL -->
                 <?php if (empty($laporan_list)): ?>
                     <div class="alert alert-info text-center">
-                        <strong>Belum ada laporan <?= $filter === 'semua' ? '' : $filter ?>.</strong>
+                        <strong>Tidak ada hasil untuk pencarian ini.</strong>
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">

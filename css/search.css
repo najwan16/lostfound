@@ -1,0 +1,57 @@
+/* css/search.css */
+body {
+    background: #f8f9fa;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 16px 16px 0 0;
+    text-align: center;
+}
+
+.filter-btn {
+    margin: 0.5rem;
+}
+
+.table th {
+    background-color: #e3f2fd;
+    font-weight: 600;
+}
+
+.badge-tipe {
+    font-size: 0.8rem;
+}
+
+.pembuat {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.nim {
+    font-weight: bold;
+    color: #1e40af;
+}
+
+.status-hilang {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-ditemukan {
+    background-color: #d1edff;
+    color: #0c5460;
+}
+
+.search-form .form-control,
+.search-form .form-select {
+    border-radius: 12px;
+}
