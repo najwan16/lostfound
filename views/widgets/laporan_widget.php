@@ -3,14 +3,16 @@
 if (!isset($laporanList)) $laporanList = [];
 if (!isset($filter)) $filter = 'semua';
 
+// === MAP FILTER KE STATUS DATABASE ===
 $statusMap = [
-    'semua' => null,
+    'semua'           => null,
     'belum_ditemukan' => 'belum_ditemukan',
-    'selesai' => 'selesai'
+    'selesai'         => 'ditemukan'
 ];
 
 $targetStatus = $statusMap[$filter] ?? null;
 
+// === FILTER DATA ===
 $filtered = ($filter === 'semua')
     ? $laporanList
     : array_filter($laporanList, fn($item) => ($item['status'] ?? '') === $targetStatus);
@@ -23,14 +25,13 @@ $filtered = ($filter === 'semua')
 <?php else: ?>
     <?php foreach ($filtered as $item): ?>
         <?php
-        $isSelesai = ($item['status'] ?? 'belum_ditemukan') === 'selesai';
+        $dbStatus = $item['status'] ?? 'belum_ditemukan';
+        $isSelesai = $dbStatus === 'ditemukan';
         $statusClass = $isSelesai ? 'status-completed' : 'status-pending';
         $statusText = $isSelesai ? 'Selesai' : 'Belum Selesai';
 
-        // GAMBAR DARI DATABASE
         $defaultImg = 'https://via.placeholder.com/300x200/eeeeee/999999?text=No+Image';
         $imgSrc = $defaultImg;
-
         if (!empty($item['foto'])) {
             $serverPath = __DIR__ . '/../../' . $item['foto'];
             $urlPath = '/' . $item['foto'];
@@ -39,12 +40,11 @@ $filtered = ($filter === 'semua')
             }
         }
         ?>
-        <!-- CARD SESUAI laporan.css -->
-        <a href="index.php?action=detail_laporan&id=<?= $item['id_laporan'] ?>" 
+        <a href="index.php?action=detail_laporan&id=<?= $item['id_laporan'] ?>"
            class="text-decoration-none text-dark d-block">
             <div class="card">
                 <div class="card-image">
-                    <img src="<?= htmlspecialchars($imgSrc) ?>" 
+                    <img src="<?= htmlspecialchars($imgSrc) ?>"
                          alt="<?= htmlspecialchars($item['nama_barang'] ?? 'Barang') ?>"
                          onerror="this.src='<?= $defaultImg ?>';">
                     <span class="card-status <?= $statusClass ?>">
