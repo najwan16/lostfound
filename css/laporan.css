@@ -1,7 +1,3 @@
-/* laporan.css */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap');
-
-/* Reset & Global */
 * {
     margin: 0;
     padding: 0;
@@ -9,66 +5,71 @@
 }
 
 body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: "Plus Jakarta Sans", sans-serif;
     background-color: #f8f9fa;
-    color: #333;
-    line-height: 1.6;
 }
 
-/* Banner */
+.container {
+    margin-top: 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Banner Section */
 .banner {
+    margin-top: 2rem;
     display: flex;
-    background: #F8E4DD;
+    background: #f8e4dd;
     border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    margin: 20px 0;
+    overflow: visible;
+    margin-bottom: 40px;
     min-height: 350px;
-    height: auto;
     max-height: 350px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    position: relative;
 }
 
-.left {
+.banner-left {
     flex: 1;
     padding: 50px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 15px;
+    gap: 16px;
 }
 
-.left h1 {
+.banner-left h1 {
     font-size: 48px;
-    color: #262832;
     font-weight: 700;
-    line-height: 1.2;
+    color: #262832;
     margin: 0;
+    line-height: 1.2;
 }
 
-.left p {
-    font-size: 20px;
+.banner-left p {
+    font-size: 18px;
     color: #262832;
+    margin: 0;
     line-height: 1.6;
     font-weight: 400;
-    margin: 0;
 }
 
 .btn-report {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #E57229;
+    background: #e57229;
     color: white;
-    padding: 16px 28px;
+    padding: 14px 24px;
     border-radius: 30px;
     text-decoration: none;
     font-weight: 600;
     font-size: 16px;
     width: fit-content;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(229, 114, 41, 0.3);
     border: none;
     cursor: pointer;
+    box-shadow: 0 4px 15px rgba(229, 114, 41, 0.3);
 }
 
 .btn-report:hover {
@@ -77,102 +78,115 @@ body {
     box-shadow: 0 6px 20px rgba(229, 114, 41, 0.4);
 }
 
-.right {
-    flex: 1;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.btn-report::before {
+    content: "+";
+    font-size: 20px;
+    font-weight: 700;
 }
 
-.right img {
+.banner-right {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    overflow: visible;
+    padding: 0;
+    position: relative;
+}
+
+.banner-right img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    object-position: right center;
+    object-position: right bottom;
+    max-height: 350px;
 }
 
-/* KONTEN UTAMA */
-.content-section {
-    margin-top: 30px;
-    margin-bottom: 50px;
+/* Content Layout */
+.content-wrapper {
+    display: flex;
+    gap: 24px;
 }
 
-/* FILTER SIDEBAR */
-.filter-sidebar {
+/* Sidebar Filter */
+.sidebar {
+    width: 280px;
+    flex-shrink: 0;
+}
+
+.filter-box {
     background: white;
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    height: fit-content;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
 .filter-btn {
+    width: 100%;
     display: flex;
     align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 14px 16px;
-    margin-bottom: 8px;
-    background: #f1f1f1;
+    gap: 12px;
+    padding: 14px 18px;
     border: none;
     border-radius: 12px;
     font-size: 15px;
     font-weight: 600;
-    color: #555;
-    text-align: left;
-    transition: all 0.3s ease;
     cursor: pointer;
-}
-
-.filter-btn i {
-    font-size: 18px;
-    color: #E57229;
-}
-
-.filter-btn:hover {
-    background: #fff4e6;
-    color: #E57229;
+    transition: all 0.3s ease;
+    margin-bottom: 8px;
+    background: #f8f9fa;
+    color: #555;
 }
 
 .filter-btn.active {
-    background: #E57229;
+    background: #e57229;
     color: white;
 }
 
-.filter-btn.active i {
-    color: white;
+.filter-btn:hover:not(.active) {
+    background: #fff4e6;
+    color: #e57229;
+}
+
+.filter-icon {
+    font-size: 18px;
 }
 
 .filter-divider {
+    height: 1px;
+    background: #e0e0e0;
     margin: 16px 0;
-    border: 0;
-    border-top: 1px solid #ddd;
-    opacity: 0.6;
 }
 
-/* CARD LAPORAN */
-.laporan-card {
+/* Cards Grid */
+.cards-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+/* Card Styling */
+.card {
     background: white;
-    border-radius: 16px;
+    border-radius: 28px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    cursor: pointer;
+    position: relative;
 }
 
-.laporan-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
 }
 
-/* GAMBAR CARD – DIPERBAIKI */
 .card-image {
-    height: 180px;
+    width: 100%;
+    height: 200px;
     overflow: hidden;
-    background: #f8f9fa;
+    background: #f0f0f0;
     position: relative;
 }
 
@@ -181,157 +195,115 @@ body {
     height: 100%;
     object-fit: cover;
     transition: transform 0.4s ease;
-    display: block;
 }
 
-.laporan-card:hover .card-image img {
-    transform: scale(1.05);
+.card:hover .card-image img {
+    transform: scale(1.1);
 }
 
-/* CARD BODY */
-.card-body {
-    padding: 16px;
-    position: relative;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-/* STATUS BADGE */
-.status-badge {
+.card-status {
     position: absolute;
-    top: -10px;
+    top: 12px;
     right: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
     font-size: 11px;
     font-weight: 700;
-    padding: 5px 10px;
-    border-radius: 20px;
+    text-transform: capitalize;
+    z-index: 10;
+}
+
+.status-pending {
+    background: #ffb020;
     color: white;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    z-index: 2;
 }
 
-.status-belum {
-    background: #f39c12; /* Orange */
+.status-completed {
+    background: #2dd36f;
+    color: white;
 }
 
-.status-selesai {
-    background: #27ae60; /* Green */
+.card-content {
+    padding: 18px;
 }
 
-/* JUDUL & INFO */
 .card-title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: #262832;
-    margin: 8px 0 10px;
+    margin-bottom: 12px;
     line-height: 1.4;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .card-info {
-    margin-top: auto;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 13px;
     color: #666;
 }
 
-.card-info span {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.card-info i {
-    color: #E57229;
+.info-icon {
+    color: #e57229;
     font-size: 14px;
 }
 
-/* RESPONSIF */
+/* Responsive */
+@media (max-width: 1024px) {
+    .content-wrapper {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .filter-box {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding: 16px;
+    }
+
+    .filter-btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .filter-divider {
+        display: none;
+    }
+}
+
 @media (max-width: 768px) {
     .banner {
         flex-direction: column;
         min-height: auto;
-        max-height: none;
-        height: auto;
-        border-radius: 16px;
-        margin: 15px 0;
     }
 
-    .left {
-        padding: 30px 20px;
-        text-align: center;
-        gap: 14px;
+    .banner-left {
+        padding: 30px 24px;
     }
 
-    .left h1 {
-        font-size: 32px;
+    .banner-left h1 {
+        font-size: 36px;
     }
 
-    .left p {
+    .banner-left p {
         font-size: 16px;
     }
 
-    .btn-report {
-        margin: 0 auto;
-        padding: 14px 24px;
-        font-size: 15px;
+    .banner-right {
+        height: 200px;
     }
 
-    .right {
-        height: 250px;
-    }
-
-    .right img {
-        object-position: center;
-    }
-
-    .content-section .row {
-        flex-direction: column;
-    }
-
-    .filter-sidebar {
-        order: -1;
-        margin-bottom: 20px;
-    }
-
-    .filter-btn {
-        justify-content: center;
-        font-size: 14px;
-    }
-
-    .card-image {
-        height: 160px;
-    }
-
-    .card-title {
-        font-size: 14px;
+    .cards-grid {
+        grid-template-columns: 1fr;
     }
 }
-
-@media (min-width: 769px) and (max-width: 991px) {
-    .left {
-        padding: 40px;
-    }
-
-    .left h1 {
-        font-size: 40px;
-    }
-
-    .banner {
-        min-height: 300px;
-        max-height: 320px;
-    }
-
-    .card-image {
-        height: 170px;
-    }
-}
-
-/* FIX: Hapus duplikat .card-image img */

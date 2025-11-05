@@ -1,6 +1,6 @@
 body {
     background-color: #ffffff;
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -10,18 +10,18 @@ body {
 
 .login-container {
     display: flex;
-    width: 90%; /* Melebar ke kiri dan kanan, max 90% lebar layar */
-    max-width: 1500px; /* Batas maksimum agar tidak terlalu lebar */
+    width: 90%;
+    max-width: 1500px;
     height: 80vh;
     background: #ffffff;
     border-radius: 10px;
     overflow: hidden;
-    margin: 0 auto; /* Pusatkan dengan margin otomatis */
+    margin: 0 auto;
 }
 
 .logo-section {
     flex: 1;
-    background-color: #ffffff; /* Latar logo putih */
+    background-color: #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -46,12 +46,12 @@ body {
 }
 
 .btn-primary {
-    background-color: #E57229; /* Warna orange FILKOM */
-    border-color: #E57229;
+    background-color: #e57229;
+    border-color: #e57229;
 }
 
 .btn-primary:hover {
-    background-color: #c9561f; /* Hover lebih gelap */
+    background-color: #c9561f;
     border-color: #c9561f;
 }
 
@@ -69,21 +69,47 @@ h2.text-center {
     font-size: 32px;
 }
 
+.password-wrapper {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+    color: #6c757d;
+    transition: color 0.2s;
+}
+
+.password-toggle:hover {
+    color: #495057;
+}
+
+.password-wrapper input {
+    padding-right: 40px;
+}
+
 @media (max-width: 768px) {
     .login-container {
         flex-direction: column;
         height: auto;
-        width: 100%; /* Penuh lebar di HP */
+        width: 100%;
         margin: 0;
     }
+
     .logo-section,
     .form-section {
         flex: none;
         height: auto;
     }
+
     .logo-section {
         padding: 20px;
     }
+
     .form-section {
         padding: 50px;
     }

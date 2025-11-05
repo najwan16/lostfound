@@ -134,21 +134,25 @@ switch ($action) {
             }
 
             // === SIMPAN KE DATABASE ===
+            // === SIMPAN KE DATABASE ===
             $hashed = password_hash($password, PASSWORD_DEFAULT);
 
             try {
                 getDB()->beginTransaction();
 
                 $stmt = getDB()->prepare("
-                    INSERT INTO akun (email, password, nama, nomor_kontak, role)
-                    VALUES (?, ?, ?, ?, ?)
-                ");
+        INSERT INTO akun (email, password, nama, nomor_kontak, role)
+        VALUES (?, ?, ?, ?, ?)
+    ");
                 $stmt->execute([$email, $hashed, $nama, $nomor_kontak, $role]);
                 $id_akun = getDB()->lastInsertId();
 
                 if ($role === 'civitas') {
                     $stmt = getDB()->prepare("INSERT INTO civitas (id_akun, nomor_induk) VALUES (?, ?)");
                     $stmt->execute([$id_akun, $nomor_induk]);
+                } elseif ($role === 'satpam') {
+                    $stmt = getDB()->prepare("INSERT INTO satpam (id_akun) VALUES (?)");
+                    $stmt->execute([$id_akun]);
                 }
 
                 getDB()->commit();
@@ -230,12 +234,33 @@ switch ($action) {
             include 'views/laporan_form.php';
         }
         break;
+
     case 'search_page':
         $result = $laporanController->getRiwayatLaporan();
         $riwayat = $result['riwayat'] ?? [];
         $message = $result['message'] ?? '';
         $success = $result['success'] ?? false;
         include 'views/search_page.php';
+        break;
+
+    case 'detail_laporan':
+        $id = $_GET['id'] ?? 0;
+        if (!$id || !is_numeric($id)) {
+            include 'views/error.php';
+            break;
+        }
+        include 'views/detail_laporan.php';
+        break;
+
+    case 'claim':
+        $id = $_GET['id'] ?? 0;
+        if (!$id || !is_numeric($id)) {
+            include 'views/error.php';
+            break;
+        }
+        // Kirim ID ke claim.php
+        $laporanId = $id;
+        include 'views/claim.php';
         break;
 
     // ==================================================================

@@ -1,0 +1,206 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #f8f9fa;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    color: #333;
+    line-height: 1.6;
+    /* 70px navbar + 20px jarak */
+    min-height: 100vh;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0rem 1rem;
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+/* Card Preview Kiri */
+.item-preview-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    width: 320px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.preview-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.preview-title {
+    font: 700 1.25rem/1.2 "Plus Jakarta Sans", sans-serif;
+    color: #1e293b;
+    margin-bottom: 0.75rem;
+}
+
+.preview-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.preview-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.material-symbols-outlined {
+    font-size: 1.1rem;
+    font-variation-settings: "FILL" 0, "wght" 300;
+}
+
+/* Form Kanan */
+.form-section {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    flex: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.required {
+    color: #ef4444;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: white;
+    transition: 0.2s;
+}
+
+.form-input:disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #f97316;
+}
+
+.form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Upload */
+.upload-area {
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.upload-area:hover {
+    border-color: #f97316;
+    background: #fff7ed;
+}
+
+.upload-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+    opacity: 0.3;
+}
+
+.upload-text {
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.upload-text strong {
+    color: #1e293b;
+}
+
+.upload-hint {
+    color: #f97316;
+    font-size: 0.9rem;
+}
+
+.file-input {
+    display: none;
+}
+
+/* Tombol */
+.submit-btn {
+    background: #f97316;
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 1rem;
+    transition: 0.2s;
+}
+
+.submit-btn:hover {
+    background: #ea580c;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .item-preview-card {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 1rem 0.5rem;
+    }
+
+    .form-section {
+        padding: 1.5rem;
+    }
+
+    .upload-area {
+        padding: 2rem 1rem;
+    }
+}

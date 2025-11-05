@@ -31,11 +31,15 @@ class AkunModel
 
     public function getProfil($idAkun)
     {
-        $stmt = $this->database->prepare("SELECT a.*, c.nomor_induk FROM akun a LEFT JOIN civitas c ON a.id_akun = c.id_akun WHERE a.id_akun = :id");
+        $stmt = $this->database->prepare("
+        SELECT a.*, c.nomor_induk, s.id_satpam 
+        FROM akun a 
+        LEFT JOIN civitas c ON a.id_akun = c.id_akun 
+        LEFT JOIN satpam s ON a.id_akun = s.id_akun 
+        WHERE a.id_akun = :id
+    ");
         $stmt->execute(['id' => $idAkun]);
-        $profil = $stmt->fetch();
-        error_log("Profile fetched for idAkun=$idAkun: " . print_r($profil, true));
-        return $profil;
+        return $stmt->fetch();
     }
 
     public function updateProfil($idAkun, $nama, $nomorKontak)
@@ -53,5 +57,5 @@ class AkunModel
         $stmt = $this->database->prepare("SELECT * FROM akun WHERE email = :email");
         $stmt->execute(['email' => $email]);
         return $stmt->fetch();
-    }       
+    }
 }

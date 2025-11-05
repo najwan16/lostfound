@@ -120,6 +120,15 @@ class LaporanController
             return ['success' => false, 'message' => 'Akses ditolak'];
         }
 
+        // === VALIDASI: CEK TABEL satpam PAKAI getDB() GLOBAL ===
+        $pdo = getDB();
+        $stmt = $pdo->prepare("SELECT id_satpam FROM satpam WHERE id_akun = ?");
+        $stmt->execute([$idAkun]);
+        if (!$stmt->fetch()) {
+            return ['success' => false, 'message' => 'Akses ditolak: Anda bukan satpam resmi'];
+        }
+        // === AKHIR VALIDASI ===
+
         $result = $this->model->simpanLaporanDitemukan(
             $idAkun,
             $namaBarang,
