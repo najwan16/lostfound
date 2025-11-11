@@ -1,4 +1,3 @@
-<!-- views/admin/laporan_ditemukan_form.php -->
 <?php
 require_once dirname(__DIR__, 2) . '/config/db.php';
 require_once dirname(__DIR__, 2) . '/controllers/AuthController.php';
@@ -12,10 +11,8 @@ if ($sessionManager->get('role') !== 'satpam') {
     exit;
 }
 
-// PASS getDB() KE CONSTRUCTOR
 $laporanController = new LaporanController(getDB());
 
-// Proses submit
 $alert_message = '';
 $alert_type = '';
 
@@ -42,89 +39,150 @@ $page_title = 'Lapor Barang Ditemukan';
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $page_title ?></title>
+
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
     <link href="../../css/admin.css" rel="stylesheet">
+
 </head>
+
 <body>
 
     <!-- SIDEBAR -->
     <?php include 'widgets/sidebar.php'; ?>
 
-    <!-- HEADER -->
-    <?php include 'widgets/header.php'; ?>
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="container-fluid p-4">
 
-        <!-- ALERT -->
-        <?php include 'widgets/alert.php'; ?>
-
-        <!-- CARD: FORM -->
-        <?php
-        $card_header = 'Lapor Barang Ditemukan';
-        $header_class = 'bg-gradient-success';
-        ob_start();
-        ?>
-        <form method="POST" action="" id="laporanForm">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Nama Barang <span class="text-danger">*</span></label>
-                    <input type="text" name="nama_barang" class="form-control" placeholder="Contoh: Laptop Dell"
-                           value="<?= htmlspecialchars($_POST['nama_barang'] ?? '') ?>" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Kategori <span class="text-danger">*</span></label>
-                    <select name="kategori" class="form-select" required>
-                        <option value="">Pilih Kategori</option>
-                        <option value="elektronik" <?= ($_POST['kategori'] ?? '') === 'elektronik' ? 'selected' : '' ?>>Elektronik</option>
-                        <option value="dokumen" <?= ($_POST['kategori'] ?? '') === 'dokumen' ? 'selected' : '' ?>>Dokumen</option>
-                        <option value="pakaian" <?= ($_POST['kategori'] ?? '') === 'pakaian' ? 'selected' : '' ?>>Pakaian</option>
-                        <option value="lainnya" <?= ($_POST['kategori'] ?? '') === 'lainnya' ? 'selected' : '' ?>>Lainnya</option>
-                    </select>
-                </div>
+            <!-- PAGE HEADER -->
+            <div class="page-header mb-4">
+                <h3 class="mb-1"><?= $page_title ?></h3>
+                <p class="text-muted mb-0">
+                    Selamat datang, <strong><?= htmlspecialchars($sessionManager->get('nama')) ?></strong>
+                </p>
             </div>
 
-            <div class="row g-3 mt-2">
-                <div class="col-md-6">
-                    <label class="form-label">Lokasi Ditemukan <span class="text-danger">*</span></label>
-                    <select name="lokasi" class="form-select" required>
-                        <option value="">Pilih Lokasi</option>
-                        <?php
-                        $locations = ['Area Parkir', 'auditorium algoritma', 'EduTech', 'Gazebo lantai 4', 'Gedung Kreativitas Mahasiswa (GKM)', 'Junction', 'kantin', 'Laboratorium Pembelajaran', 'Mushola Ulul Al-Baab', 'Ruang Baca', 'Ruang Ujian', 'ruang tunggu', 'Smart Class Gedung F'];
-                        foreach ($locations as $loc): ?>
-                            <option value="<?= $loc ?>" <?= ($_POST['lokasi'] ?? '') === $loc ? 'selected' : '' ?>><?= $loc ?></option>
-                        <?php endforeach; ?>
-                    </select>
+            <!-- ALERT -->
+            <?php if (!empty($alert_message)): ?>
+                <div class="alert alert-<?= $alert_type ?> alert-dismissible fade show">
+                    <?= htmlspecialchars($alert_message) ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">Waktu Ditemukan <span class="text-danger">*</span></label>
-                    <input type="datetime-local" name="waktu" class="form-control" value="<?= htmlspecialchars($_POST['waktu'] ?? '') ?>" required>
+            <?php endif; ?>
+
+            <!-- CARD: FORM -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">Lapor Barang Ditemukan</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="" id="laporanForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="nama_barang">
+                                    Nama Barang <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                    id="nama_barang"
+                                    name="nama_barang"
+                                    class="form-control"
+                                    placeholder="Contoh: Laptop Dell"
+                                    value="<?= htmlspecialchars($_POST['nama_barang'] ?? '') ?>"
+                                    required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="kategori">
+                                    Kategori <span class="text-danger">*</span>
+                                </label>
+                                <select id="kategori" name="kategori" class="form-select" required>
+                                    <option value="">Pilih Kategori</option>
+                                    <option value="elektronik" <?= ($_POST['kategori'] ?? '') === 'elektronik' ? 'selected' : '' ?>>Elektronik</option>
+                                    <option value="dokumen" <?= ($_POST['kategori'] ?? '') === 'dokumen' ? 'selected' : '' ?>>Dokumen</option>
+                                    <option value="pakaian" <?= ($_POST['kategori'] ?? '') === 'pakaian' ? 'selected' : '' ?>>Pakaian</option>
+                                    <option value="lainnya" <?= ($_POST['kategori'] ?? '') === 'lainnya' ? 'selected' : '' ?>>Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label" for="lokasi">
+                                    Lokasi Ditemukan <span class="text-danger">*</span>
+                                </label>
+                                <select id="lokasi" name="lokasi" class="form-select" required>
+                                    <option value="">Pilih Lokasi</option>
+                                    <?php
+                                    $locations = [
+                                        'Area Parkir',
+                                        'auditorium algoritma',
+                                        'EduTech',
+                                        'Gazebo lantai 4',
+                                        'Gedung Kreativitas Mahasiswa (GKM)',
+                                        'Junction',
+                                        'kantin',
+                                        'Laboratorium Pembelajaran',
+                                        'Mushola Ulul Al-Baab',
+                                        'Ruang Baca',
+                                        'Ruang Ujian',
+                                        'ruang tunggu',
+                                        'Smart Class Gedung F'
+                                    ];
+                                    foreach ($locations as $loc): ?>
+                                        <option value="<?= $loc ?>" <?= ($_POST['lokasi'] ?? '') === $loc ? 'selected' : '' ?>>
+                                            <?= $loc ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="waktu">
+                                    Waktu Ditemukan <span class="text-danger">*</span>
+                                </label>
+                                <input type="datetime-local"
+                                    id="waktu"
+                                    name="waktu"
+                                    class="form-control"
+                                    value="<?= htmlspecialchars($_POST['waktu'] ?? '') ?>"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="form-label" for="deskripsi_fisik">
+                                Deskripsi Fisik <span class="text-danger">*</span>
+                            </label>
+                            <textarea id="deskripsi_fisik"
+                                name="deskripsi_fisik"
+                                class="form-control"
+                                rows="4"
+                                placeholder="Contoh: Warna hitam, ada stiker..."
+                                required><?= htmlspecialchars($_POST['deskripsi_fisik'] ?? '') ?></textarea>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                Laporkan Barang
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-
-            <div class="mt-3">
-                <label class="form-label">Deskripsi Fisik <span class="text-danger">*</span></label>
-                <textarea name="deskripsi_fisik" class="form-control" rows="4" placeholder="Contoh: Warna hitam, ada stiker..." required><?= htmlspecialchars($_POST['deskripsi_fisik'] ?? '') ?></textarea>
-            </div>
-
-            <div class="text-center mt-4">
-                <button type="submit" class="btn btn-success btn-lg">
-                    Laporkan Barang
-                </button>
-            </div>
-        </form>
-        <?php
-        $card_content = ob_get_clean();
-        include 'widgets/card.php';
-        ?>
-
+        </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

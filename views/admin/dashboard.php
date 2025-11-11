@@ -1,4 +1,3 @@
-<!-- views/admin/dashboard.php -->
 <?php
 require_once dirname(__DIR__, 2) . '/config/db.php';
 require_once dirname(__DIR__, 2) . '/controllers/AuthController.php';
@@ -35,11 +34,17 @@ $page_title = 'Dashboard Satpam';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $page_title ?></title>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <link href="..//css/admin.css" rel="stylesheet">
+
+    <!-- CSS MODULAR -->
+    <link href="../../css/admin.css" rel="stylesheet">
+
 </head>
 
 <body>
@@ -47,84 +52,90 @@ $page_title = 'Dashboard Satpam';
     <!-- SIDEBAR -->
     <?php include 'widgets/sidebar.php'; ?>
 
-    <!-- HEADER -->
-    <?php include 'widgets/header.php'; ?>
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="container-fluid p-4">
 
-    <!-- CARD: DAFTAR LAPORAN -->
-    <?php
-    $card_header = '<i class="bi bi-list-ul"></i> Semua Laporan Barang <small class="text-white-50">(Hilang & Ditemukan)</small>';
-    $header_class = 'bg-gradient-primary';
-    ob_start();
-    ?>
-    <?php if (empty($laporan_list)): ?>
-        <div class="alert alert-info text-center">
-            Belum ada laporan saat ini.
+            <!-- PAGE HEADER -->
+            <div class="page-header mb-4">
+                <h3 class="mb-1"><?= $page_title ?></h3>
+                <p class="text-muted mb-0">
+                    Selamat datang, <strong><?= htmlspecialchars($sessionManager->get('nama')) ?></strong>
+                </p>
+            </div>
+
+            <!-- CARD: DAFTAR LAPORAN -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">Semua Laporan Barang <small class="text-white-50">(Hilang & Ditemukan)</small></h5>
+                </div>
+                <div class="card-body">
+                    <?php if (empty($laporan_list)): ?>
+                        <div class="alert alert-info text-center">
+                            Belum ada laporan saat ini.
+                        </div>
+                    <?php else: ?>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Tipe</th>
+                                        <th>Barang</th>
+                                        <th>Deskripsi</th>
+                                        <th>Kategori</th>
+                                        <th>Lokasi</th>
+                                        <th>Waktu</th>
+                                        <th>Status</th>
+                                        <th>Dibuat</th>
+                                        <th>Pembuat</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($laporan_list as $i => $l): ?>
+                                        <?php
+                                        $tipeBadge = $l['tipe_laporan'] === 'hilang' ? 'bg-warning text-dark' : 'bg-success text-white';
+                                        $tipeText = $l['tipe_laporan'] === 'hilang' ? 'Hilang' : 'Ditemukan';
+                                        ?>
+                                        <tr class="clickable-row" data-href="../../index.php?action=detail_laporan_satpam&id=<?= $l['id_laporan'] ?>">
+                                            <td><?= $i + 1 ?></td>
+                                            <td><span class="badge <?= $tipeBadge ?> badge-tipe"><?= $tipeText ?></span></td>
+                                            <td><strong><?= htmlspecialchars($l['nama_barang']) ?></strong></td>
+                                            <td class="text-truncate" style="max-width:150px;"><?= htmlspecialchars($l['deskripsi_fisik'] ?: '-') ?></td>
+                                            <td><span class="badge bg-primary"><?= ucfirst($l['kategori']) ?></span></td>
+                                            <td><?= htmlspecialchars($l['lokasi']) ?></td>
+                                            <td><small><?= date('d M Y', strtotime($l['waktu'])) ?><br><?= date('H:i', strtotime($l['waktu'])) ?></small></td>
+                                            <td>
+                                                <span class="badge <?= $l['status'] === 'belum_ditemukan' ? 'bg-warning text-dark' : 'bg-success' ?>">
+                                                    <?= ucfirst(str_replace('_', ' ', $l['status'])) ?>
+                                                </span>
+                                            </td>
+                                            <td><?= date('d M Y', strtotime($l['created_at'])) ?></td>
+                                            <td>
+                                                <div class="pembuat">
+                                                    <strong><?= htmlspecialchars($l['nama_pembuat']) ?></strong><br>
+                                                    <small class="text-muted"><?= htmlspecialchars($l['nomor_kontak']) ?></small>
+                                                    <?php if ($l['nomor_induk']): ?>
+                                                        <div class="nim">NIM: <?= htmlspecialchars($l['nomor_induk']) ?></div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="text-center mt-4">
+                        <a href="../../index.php?action=laporan_ditemukan_form" class="btn btn-success btn-lg">
+                            Lapor Barang Ditemukan
+                        </a>
+                    </div>
+                </div>
+            </div>
+
         </div>
-    <?php else: ?>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Tipe</th>
-                        <th>Barang</th>
-                        <th>Deskripsi</th>
-                        <th>Kategori</th>
-                        <th>Lokasi</th>
-                        <th>Waktu</th>
-                        <th>Status</th>
-                        <th>Dibuat</th>
-                        <th>Pembuat</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($laporan_list as $i => $l): ?>
-                        <?php
-                        $tipeBadge = $l['tipe_laporan'] === 'hilang' ? 'bg-warning text-dark' : 'bg-success text-white';
-                        $tipeText = $l['tipe_laporan'] === 'hilang' ? 'Hilang' : 'Ditemukan';
-                        ?>
-                        <tr class="clickable-row" data-href="../../index.php?action=detail_laporan_satpam&id=<?= $l['id_laporan'] ?>">
-                            <td><?= $i + 1 ?></td>
-                            <td><span class="badge <?= $tipeBadge ?> badge-tipe"><?= $tipeText ?></span></td>
-                            <td><strong><?= htmlspecialchars($l['nama_barang']) ?></strong></td>
-                            <td class="text-truncate" style="max-width:150px;"><?= htmlspecialchars($l['deskripsi_fisik'] ?: '-') ?></td>
-                            <td><span class="badge bg-primary"><?= ucfirst($l['kategori']) ?></span></td>
-                            <td><?= htmlspecialchars($l['lokasi']) ?></td>
-                            <td><small><?= date('d M Y', strtotime($l['waktu'])) ?><br><?= date('H:i', strtotime($l['waktu'])) ?></small></td>
-                            <td>
-                                <span class="badge <?= $l['status'] === 'belum_ditemukan' ? 'bg-warning text-dark' : 'bg-success' ?>">
-                                    <?= ucfirst(str_replace('_', ' ', $l['status'])) ?>
-                                </span>
-                            </td>
-                            <td><?= date('d M Y', strtotime($l['created_at'])) ?></td>
-                            <td>
-                                <div class="pembuat">
-                                    <strong><?= htmlspecialchars($l['nama_pembuat']) ?></strong><br>
-                                    <small class="text-muted"><?= htmlspecialchars($l['nomor_kontak']) ?></small>
-                                    <?php if ($l['nomor_induk']): ?>
-                                        <div class="nim">NIM: <?= htmlspecialchars($l['nomor_induk']) ?></div>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    <?php endif; ?>
-
-    <div class="text-center mt-4">
-        <a href="../../index.php?action=laporan_ditemukan_form" class="btn btn-success btn-lg">
-            Lapor Barang Ditemukan
-        </a>
-    </div>
-
-    <?php
-    $card_content = ob_get_clean();
-    include 'widgets/card.php';
-    ?>
-
-    </div>
     </div>
 
     <script>

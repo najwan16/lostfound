@@ -76,13 +76,12 @@ $current_page = 'klaim';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <link href="../public/css/admin.css" rel="stylesheet">
+    <link href="css/claim.css" rel="stylesheet">
 </head>
 
 <body>
+    <?php include 'header.php'; ?>
 
-    <!-- SIDEBAR -->
-    <?php include 'admin/widget/sidebar.php'; ?>
 
     <!-- MAIN CONTENT -->
     <div class="main-content">

@@ -328,9 +328,10 @@ switch ($action) {
 
         // === 6. SIMPAN KLAIM KE DB ===
         $stmt = getDB()->prepare("
-        INSERT INTO klaim (id_laporan, id_akun, bukti_kepemilikan, deskripsi_ciri, status_klaim)
-        VALUES (?, ?, ?, ?, 'diajukan')
-    ");
+    INSERT INTO klaim 
+    (id_laporan, id_akun, bukti_kepemilikan, deskripsi_ciri, status_klaim, created_at, updated_at)
+    VALUES (?, ?, ?, ?, 'diajukan', NOW(), NOW())
+");
         $stmt->execute([$id_laporan, $userId, $buktiPath, $deskripsi_ciri]);
 
         // === 7. SUKSES ===
@@ -516,17 +517,20 @@ switch ($action) {
             exit;
         }
 
-        // Update status klaim
-        $stmt = getDB()->prepare("UPDATE klaim SET status_klaim = ? WHERE id_klaim = ?");
+        $stmt = getDB()->prepare("
+        UPDATE klaim 
+        SET status_klaim = ?, updated_at = NOW() 
+        WHERE id_klaim = ?
+    ");
         $stmt->execute([$status, $id_klaim]);
 
-        // Jika disetujui → ubah status laporan jadi sudah_diambil
         if ($status === 'diverifikasi') {
             $stmt = getDB()->prepare("UPDATE laporan SET status = 'sudah_diambil' WHERE id_laporan = ?");
             $stmt->execute([$id_laporan]);
         }
 
-        header('Location: index.php?action=dashboard_klaim&success=1');
+        // TAMBAHKAN refresh=1
+        header('Location: index.php?action=dashboard_klaim&tab=diverifikasi&nocache=' . time());
         exit;
         break;
 
