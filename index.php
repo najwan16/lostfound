@@ -264,6 +264,82 @@ switch ($action) {
         break;
 
     // ==================================================================
+    // KLAIM
+    // ==============================================================
+    case 'submit_klaim':
+        // === 1. CEK SESSION & ROLE ===
+        if (!isset($_SESSION['userId']) || $_SESSION['role'] !== 'civitas') {
+            header('Location: index.php?action=home');
+            exit;
+        }
+
+        $userId = $_SESSION['userId']; // AMAN: PASTIKAN ADA
+        $id_laporan = (int)($_POST['id_laporan'] ?? 0);
+        $deskripsi_ciri = trim($_POST['deskripsi_ciri'] ?? '');
+        $bukti_file = $_FILES['bukti_kepemilikan'] ?? null;
+
+        // === 2. VALIDASI INPUT ===
+        if ($id_laporan <= 0 || empty($deskripsi_ciri) || !$bukti_file || $bukti_file['error'] !== UPLOAD_ERR_OK) {
+            $error = "Semua field wajib diisi dan file harus valid.";
+            header("Location: index.php?action=claim&id=$id_laporan&error=" . urlencode($error));
+            exit;
+        }
+
+        // === 3. CEK LAPORAN VALID & SUDAH DIAMBIL ===
+        $stmt = getDB()->prepare("SELECT 1 FROM laporan WHERE id_laporan = ? AND status = 'sudah_diambil'");
+        $stmt->execute([$id_laporan]);
+        if (!$stmt->fetch()) {
+            $error = "Laporan tidak valid atau belum diambil.";
+            header("Location: index.php?action=claim&id=$id_laporan&error=" . urlencode($error));
+            exit;
+        }
+
+        // === 4. CEK SUDAH KLAIM ===
+        $stmt = getDB()->prepare("SELECT 1 FROM klaim WHERE id_laporan = ? AND id_akun = ?");
+        $stmt->execute([$id_laporan, $userId]);
+        if ($stmt->fetch()) {
+            $error = "Anda sudah mengajukan klaim.";
+            header("Location: index.php?action=claim&id=$id_laporan&error=" . urlencode($error));
+            exit;
+        }
+
+        // === 5. UPLOAD BUKTI ===
+        $ext = strtolower(pathinfo($bukti_file['name'], PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png'];
+        if (!in_array($ext, $allowed) || $bukti_file['size'] > 3 * 1024 * 1024) {
+            $error = "File harus JPG/PNG dan <3MB.";
+            header("Location: index.php?action=claim&id=$id_laporan&error=" . urlencode($error));
+            exit;
+        }
+
+        $uploadDir = __DIR__ . '/uploads/bukti_klaim/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+
+        $newName = "bukti_klaim_{$id_laporan}_{$userId}_" . time() . ".{$ext}";
+        $dest = $uploadDir . $newName;
+
+        if (!move_uploaded_file($bukti_file['tmp_name'], $dest)) {
+            $error = "Gagal upload bukti.";
+            header("Location: index.php?action=claim&id=$id_laporan&error=" . urlencode($error));
+            exit;
+        }
+
+        $buktiPath = "uploads/bukti_klaim/{$newName}";
+
+        // === 6. SIMPAN KLAIM KE DB ===
+        $stmt = getDB()->prepare("
+        INSERT INTO klaim (id_laporan, id_akun, bukti_kepemilikan, deskripsi_ciri, status_klaim)
+        VALUES (?, ?, ?, ?, 'diajukan')
+    ");
+        $stmt->execute([$id_laporan, $userId, $buktiPath, $deskripsi_ciri]);
+
+        // === 7. SUKSES ===
+        header("Location: index.php?action=detail_laporan&id=$id_laporan&success=klaim_diajukan");
+        exit;
+        break;
+
+
+    // ==================================================================
     // DASHBOARD SATPAM
     // ==================================================================
     case 'dashboard':
@@ -308,6 +384,152 @@ switch ($action) {
         exit;
         break;
 
+    // Di switch($action)
+    case 'detail_laporan_satpam':
+        if ($userRole !== 'satpam') {
+            header('Location: index.php?action=login');
+            exit;
+        }
+        include 'views/admin/detail_laporan_satpam.php';
+        break;
+
+    case 'catat_pengambil':
+        // === CEK AKSES & METODE ===
+        if ($userRole !== 'satpam' || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?action=dashboard');
+            exit;
+        }
+
+        $id_laporan = (int)($_POST['id_laporan'] ?? 0);
+        $nim_pengambil = trim($_POST['nim_pengambil'] ?? '');
+        $foto_bukti = $_FILES['foto_bukti'] ?? null;
+        $waktu_diambil = date('Y-m-d H:i:s');
+
+        // === VALIDASI INPUT DASAR ===
+        if ($id_laporan <= 0 || empty($nim_pengambil) || !$foto_bukti || $foto_bukti['error'] !== UPLOAD_ERR_OK) {
+            $error = "NIM, foto bukti, dan ID laporan wajib diisi.";
+            error_log("Catat Pengambil Error: Input tidak lengkap - ID: $id_laporan, NIM: $nim_pengambil");
+            header("Location: index.php?action=detail_laporan_satpam&id=$id_laporan&error=" . urlencode($error));
+            exit;
+        }
+
+        // === VALIDASI NIM DI DATABASE ===
+        $stmt = getDB()->prepare("
+        SELECT a.nama, c.nomor_induk 
+        FROM akun a 
+        JOIN civitas c ON a.id_akun = c.id_akun 
+        WHERE c.nomor_induk = ? AND a.role = 'civitas'
+    ");
+        $stmt->execute([$nim_pengambil]);
+        $civitas = $stmt->fetch();
+
+        if (!$civitas) {
+            $error = "NIM tidak ditemukan di sistem civitas.";
+            error_log("Catat Pengambil Error: NIM tidak valid - $nim_pengambil");
+            header("Location: index.php?action=detail_laporan_satpam&id=$id_laporan&error=" . urlencode($error));
+            exit;
+        }
+
+        // === VALIDASI FILE ===
+        $ext = strtolower(pathinfo($foto_bukti['name'], PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png'];
+        if (!in_array($ext, $allowed)) {
+            $error = "Format foto tidak didukung. Gunakan JPG atau PNG.";
+            header("Location: index.php?action=detail_laporan_satpam&id=$id_laporan&error=" . urlencode($error));
+            exit;
+        }
+
+        if ($foto_bukti['size'] > 3 * 1024 * 1024) {
+            $error = "Ukuran foto maksimal 3MB.";
+            header("Location: index.php?action=detail_laporan_satpam&id=$id_laporan&error=" . urlencode($error));
+            exit;
+        }
+
+        // === BUAT NAMA FILE: nim_{NIM}_laporan_{ID}_img_{TIMESTAMP}.ext ===
+        $safeNim = preg_replace('/[^0-9]/', '', $nim_pengambil); // Hanya angka
+        $timestamp = time();
+        $newName = "nim_{$safeNim}_laporan_{$id_laporan}_img_{$timestamp}.{$ext}";
+
+        $uploadDir = __DIR__ . '/uploads/bukti/';
+
+        // === BUAT FOLDER JIKA BELUM ADA ===
+        if (!is_dir($uploadDir)) {
+            if (!mkdir($uploadDir, 0755, true)) {
+                $error = "Gagal membuat folder upload.";
+                error_log("Catat Pengambil Error: mkdir failed - $uploadDir");
+                header("Location: index.php?action=detail_laporan_satpam&id=$id_laporan&error=" . urlencode($error));
+                exit;
+            }
+        }
+
+        $destination = $uploadDir . $newName;
+
+        // === PINDAHKAN FILE ===
+        if (!move_uploaded_file($foto_bukti['tmp_name'], $destination)) {
+            $error = "Gagal menyimpan foto bukti ke server.";
+            error_log("Catat Pengambil Error: move_uploaded_file failed - $destination");
+            header("Location: index.php?action=detail_laporan_satpam&id=$id_laporan&error=" . urlencode($error));
+            exit;
+        }
+
+        $fotoPath = "uploads/bukti/{$newName}";
+
+        // === CEK & UPDATE STATUS (HINDARI DOUBLE SUBMIT) ===
+        $stmt = getDB()->prepare("
+        UPDATE laporan 
+        SET status = 'sudah_diambil', 
+            nim_pengambil = ?, 
+            foto_bukti = ?, 
+            waktu_diambil = ?
+        WHERE id_laporan = ? 
+          AND status != 'sudah_diambil'
+    ");
+        $affected = $stmt->execute([$nim_pengambil, $fotoPath, $waktu_diambil, $id_laporan]);
+
+        if ($stmt->rowCount() === 0) {
+            // Jika tidak ada baris yang diupdate → sudah diambil sebelumnya
+            $error = "Barang sudah pernah dicatat diambil.";
+            header("Location: index.php?action=detail_laporan_satpam&id=$id_laporan&error=" . urlencode($error));
+            exit;
+        }
+
+        // === SUCCESS LOG ===
+        error_log("Catat Pengambil Sukses: Laporan #$id_laporan diambil oleh NIM $nim_pengambil");
+
+        // === REDIRECT ===
+        header("Location: index.php?action=detail_laporan_satpam&id=$id_laporan&success=1");
+        exit;
+        break;
+
+    case 'verifikasi_klaim':
+        if ($userRole !== 'satpam' || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?action=dashboard');
+            exit;
+        }
+
+        $id_klaim = (int)($_POST['id_klaim'] ?? 0);
+        $id_laporan = (int)($_POST['id_laporan'] ?? 0);
+        $status = $_POST['status'] ?? '';
+
+        if ($id_klaim <= 0 || !in_array($status, ['diverifikasi', 'ditolak'])) {
+            header('Location: index.php?action=dashboard_klaim');
+            exit;
+        }
+
+        // Update status klaim
+        $stmt = getDB()->prepare("UPDATE klaim SET status_klaim = ? WHERE id_klaim = ?");
+        $stmt->execute([$status, $id_klaim]);
+
+        // Jika disetujui → ubah status laporan jadi sudah_diambil
+        if ($status === 'diverifikasi') {
+            $stmt = getDB()->prepare("UPDATE laporan SET status = 'sudah_diambil' WHERE id_laporan = ?");
+            $stmt->execute([$id_laporan]);
+        }
+
+        header('Location: index.php?action=dashboard_klaim&success=1');
+        exit;
+        break;
+
     // ==================================================================
     // LOGOUT (opsional, tambahkan link di view)
     // ==================================================================
@@ -322,4 +544,13 @@ switch ($action) {
     default:
         header('Location: index.php?action=home');
         exit;
+
+
+    case 'dashboard_klaim':
+        if ($userRole !== 'satpam') {
+            header('Location: index.php?action=home');
+            exit;
+        }
+        include 'views/admin/dashboard_klaim.php';
+        break;
 }

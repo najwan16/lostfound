@@ -18,7 +18,7 @@ $laporanList = $result['success'] ? $result['laporan'] : [];
 
 // Filter
 $filter = $_GET['filter'] ?? 'semua';
-$validFilters = ['semua', 'belum_ditemukan', 'selesai'];
+$validFilters = ['semua', 'belum_ditemukan', 'sudah_diambil'];
 if (!in_array($filter, $validFilters)) $filter = 'semua';
 
 // Include widget

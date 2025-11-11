@@ -35,8 +35,8 @@
                     $currentFilter = $_GET['filter'] ?? 'semua';
                     $filters = [
                         'semua' => ['label' => 'Semua Laporan', 'icon' => 'list'],
-                        'belum_ditemukan' => ['label' => 'Belum Selesai', 'icon' => 'chronic'],
-                        'selesai' => ['label' => 'Selesai', 'icon' => 'check']
+                        'belum_ditemukan' => ['label' => 'Belum Ditemukan', 'icon' => 'chronic'],
+                        'sudah_diambil' => ['label' => 'Sudah Diambil', 'icon' => 'check']
                     ];
                     ?>
                     <?php foreach ($filters as $key => $f): ?>

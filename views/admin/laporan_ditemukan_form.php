@@ -1,15 +1,24 @@
+<!-- views/admin/laporan_ditemukan_form.php -->
 <?php
-// Pastikan hanya satpam yang bisa akses
-if (!isset($sessionManager) || $sessionManager->get('role') !== 'satpam') {
-    header('Location: ../../index.php?action=login');
+require_once dirname(__DIR__, 2) . '/config/db.php';
+require_once dirname(__DIR__, 2) . '/controllers/AuthController.php';
+require_once dirname(__DIR__, 2) . '/controllers/LaporanController.php';
+
+$auth = new AuthController();
+$sessionManager = $auth->getSessionManager();
+
+if ($sessionManager->get('role') !== 'satpam') {
+    header('Location: ' . dirname(__DIR__, 2) . '/index.php?action=login');
     exit;
 }
 
-// Inisialisasi pesan
-$message = '';
-$success = false;
+// PASS getDB() KE CONSTRUCTOR
+$laporanController = new LaporanController(getDB());
 
 // Proses submit
+$alert_message = '';
+$alert_type = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $namaBarang = trim($_POST['nama_barang'] ?? '');
     $deskripsiFisik = trim($_POST['deskripsi_fisik'] ?? '');
@@ -18,159 +27,104 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $waktu = $_POST['waktu'] ?? '';
 
     if (empty($namaBarang) || empty($deskripsiFisik) || empty($kategori) || empty($lokasi) || empty($waktu)) {
-        $message = 'Semua field wajib diisi';
-        $success = false;
+        $alert_message = 'Semua field wajib diisi';
+        $alert_type = 'danger';
     } else {
-        $result = $laporanController->submitLaporanDitemukan(
-            $namaBarang,
-            $deskripsiFisik,
-            $kategori,
-            $lokasi,
-            $waktu
-        );
-        $msg = $result['success'] ? 'success' : 'error';
-        header("Location: index.php?action=laporan_ditemukan_form&msg=$msg");
-        exit;
+        $result = $laporanController->submitLaporanDitemukan($namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu);
+        $alert_message = $result['success'] ? 'Laporan berhasil disimpan' : 'Gagal menyimpan laporan';
+        $alert_type = $result['success'] ? 'success' : 'danger';
     }
 }
 
-// Baca pesan dari URL
-$msg = $_GET['msg'] ?? '';
-if ($msg === 'success') {
-    $message = 'Laporan barang ditemukan berhasil disimpan';
-    $success = true;
-} elseif ($msg === 'error') {
-    $message = 'Gagal menyimpan laporan';
-    $success = false;
-}
+$current_page = 'laporan_ditemukan';
+$page_title = 'Lapor Barang Ditemukan';
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lapor Barang Ditemukan</title>
+    <title><?= $page_title ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <link href="../../css/laporan_ditemukan_form.css" rel="stylesheet">
+    <link href="../../css/admin.css" rel="stylesheet">
 </head>
-
 <body>
 
-    <!-- SIDEBAR KIRI -->
-    <div class="sidebar-wrapper">
-        <div class="sidebar">
-            <div class="atas">
-                <img src="../../images/head.png" alt="Logo" onerror="this.src='https://via.placeholder.com/40';">
-                <div class="sidebar-btn">
-                    <a href="#" class="sidebar-item"><span class="material-symbols-outlined">inbox</span> Kotak Masuk</a>
-                    <a href="#" class="sidebar-item active"><span class="material-symbols-outlined">assignment</span> Laporan</a>
-                    <a href="#" class="sidebar-item"><span class="material-symbols-outlined">checked_bag_question</span> Klaim</a>
+    <!-- SIDEBAR -->
+    <?php include 'widgets/sidebar.php'; ?>
+
+    <!-- HEADER -->
+    <?php include 'widgets/header.php'; ?>
+
+        <!-- ALERT -->
+        <?php include 'widgets/alert.php'; ?>
+
+        <!-- CARD: FORM -->
+        <?php
+        $card_header = 'Lapor Barang Ditemukan';
+        $header_class = 'bg-gradient-success';
+        ob_start();
+        ?>
+        <form method="POST" action="" id="laporanForm">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nama Barang <span class="text-danger">*</span></label>
+                    <input type="text" name="nama_barang" class="form-control" placeholder="Contoh: Laptop Dell"
+                           value="<?= htmlspecialchars($_POST['nama_barang'] ?? '') ?>" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Kategori <span class="text-danger">*</span></label>
+                    <select name="kategori" class="form-select" required>
+                        <option value="">Pilih Kategori</option>
+                        <option value="elektronik" <?= ($_POST['kategori'] ?? '') === 'elektronik' ? 'selected' : '' ?>>Elektronik</option>
+                        <option value="dokumen" <?= ($_POST['kategori'] ?? '') === 'dokumen' ? 'selected' : '' ?>>Dokumen</option>
+                        <option value="pakaian" <?= ($_POST['kategori'] ?? '') === 'pakaian' ? 'selected' : '' ?>>Pakaian</option>
+                        <option value="lainnya" <?= ($_POST['kategori'] ?? '') === 'lainnya' ? 'selected' : '' ?>>Lainnya</option>
+                    </select>
                 </div>
             </div>
-            <div class="bawah">
-                <a href="../../index.php?action=dashboard" class="btn-keluar">
-                    <span class="material-symbols-outlined">chip_extraction</span> Keluar
-                </a>
+
+            <div class="row g-3 mt-2">
+                <div class="col-md-6">
+                    <label class="form-label">Lokasi Ditemukan <span class="text-danger">*</span></label>
+                    <select name="lokasi" class="form-select" required>
+                        <option value="">Pilih Lokasi</option>
+                        <?php
+                        $locations = ['Area Parkir', 'auditorium algoritma', 'EduTech', 'Gazebo lantai 4', 'Gedung Kreativitas Mahasiswa (GKM)', 'Junction', 'kantin', 'Laboratorium Pembelajaran', 'Mushola Ulul Al-Baab', 'Ruang Baca', 'Ruang Ujian', 'ruang tunggu', 'Smart Class Gedung F'];
+                        foreach ($locations as $loc): ?>
+                            <option value="<?= $loc ?>" <?= ($_POST['lokasi'] ?? '') === $loc ? 'selected' : '' ?>><?= $loc ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Waktu Ditemukan <span class="text-danger">*</span></label>
+                    <input type="datetime-local" name="waktu" class="form-control" value="<?= htmlspecialchars($_POST['waktu'] ?? '') ?>" required>
+                </div>
             </div>
-        </div>
+
+            <div class="mt-3">
+                <label class="form-label">Deskripsi Fisik <span class="text-danger">*</span></label>
+                <textarea name="deskripsi_fisik" class="form-control" rows="4" placeholder="Contoh: Warna hitam, ada stiker..." required><?= htmlspecialchars($_POST['deskripsi_fisik'] ?? '') ?></textarea>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-success btn-lg">
+                    Laporkan Barang
+                </button>
+            </div>
+        </form>
+        <?php
+        $card_content = ob_get_clean();
+        include 'widgets/card.php';
+        ?>
+
     </div>
+</div>
 
-    <!-- KONTEN KANAN -->
-    <div class="container">
-        <div class="form-card">
-
-            <!-- PESAN -->
-            <?php if ($message): ?>
-                <div class="alert alert-<?= $success ? 'success' : 'danger' ?> alert-dismissible fade show"
-                    style="border-radius: 12px; margin: 1.5rem 0;">
-                    <?= htmlspecialchars($message) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
-
-            <!-- FORM -->
-            <form method="POST" action="" id="laporanForm">
-                <!-- Nama Barang -->
-                <div class="form-group">
-                    <label>Nama Barang <span>*</span></label>
-                    <input type="text" name="nama_barang" placeholder="Contoh: Laptop Dell, Dompet Kulit"
-                        value="<?= htmlspecialchars($_POST['nama_barang'] ?? '') ?>" required>
-                </div>
-
-                <!-- Kategori & Lokasi -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label>Kategori <span>*</span></label>
-                        <select name="kategori" required>
-                            <option value="">Pilih Kategori</option>
-                            <option value="elektronik" <?= ($_POST['kategori'] ?? '') === 'elektronik' ? 'selected' : '' ?>>Elektronik</option>
-                            <option value="dokumen" <?= ($_POST['kategori'] ?? '') === 'dokumen' ? 'selected' : '' ?>>Dokumen</option>
-                            <option value="pakaian" <?= ($_POST['kategori'] ?? '') === 'pakaian' ? 'selected' : '' ?>>Pakaian</option>
-                            <option value="lainnya" <?= ($_POST['kategori'] ?? '') === 'lainnya' ? 'selected' : '' ?>>Lainnya</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Lokasi Ditemukan <span>*</span></label>
-                        <select name="lokasi" required>
-                            <option value="">Pilih Lokasi</option>
-                            <option value="Area Parkir" <?= ($_POST['lokasi'] ?? '') === 'Area Parkir' ? 'selected' : '' ?>>Area Parkir</option>
-                            <option value="auditorium algoritma" <?= ($_POST['lokasi'] ?? '') === 'auditorium algoritma' ? 'selected' : '' ?>>Auditorium Algoritma</option>
-                            <option value="EduTech" <?= ($_POST['lokasi'] ?? '') === 'EduTech' ? 'selected' : '' ?>>EduTech</option>
-                            <option value="Gazebo lantai 4" <?= ($_POST['lokasi'] ?? '') === 'Gazebo lantai 4' ? 'selected' : '' ?>>Gazebo Lantai 4</option>
-                            <option value="Gedung Kreativitas Mahasiswa (GKM)" <?= ($_POST['lokasi'] ?? '') === 'Gedung Kreativitas Mahasiswa (GKM)' ? 'selected' : '' ?>>Gedung Kreativitas Mahasiswa (GKM)</option>
-                            <option value="Junction" <?= ($_POST['lokasi'] ?? '') === 'Junction' ? 'selected' : '' ?>>Junction</option>
-                            <option value="kantin" <?= ($_POST['lokasi'] ?? '') === 'kantin' ? 'selected' : '' ?>>Kantin</option>
-                            <option value="Laboratorium Pembelajaran" <?= ($_POST['lokasi'] ?? '') === 'Laboratorium Pembelajaran' ? 'selected' : '' ?>>Laboratorium Pembelajaran</option>
-                            <option value="Mushola Ulul Al-Baab" <?= ($_POST['lokasi'] ?? '') === 'Mushola Ulul Al-Baab' ? 'selected' : '' ?>>Mushola Ulul Al-Baab</option>
-                            <option value="Ruang Baca" <?= ($_POST['lokasi'] ?? '') === 'Ruang Baca' ? 'selected' : '' ?>>Ruang Baca</option>
-                            <option value="Ruang Ujian" <?= ($_POST['lokasi'] ?? '') === 'Ruang Ujian' ? 'selected' : '' ?>>Ruang Ujian</option>
-                            <option value="ruang tunggu" <?= ($_POST['lokasi'] ?? '') === 'ruang tunggu' ? 'selected' : '' ?>>Ruang Tunggu</option>
-                            <option value="Smart Class Gedung F" <?= ($_POST['lokasi'] ?? '') === 'Smart Class Gedung F' ? 'selected' : '' ?>>Smart Class Gedung F</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Deskripsi Fisik -->
-                <div class="form-group">
-                    <label>Deskripsi Fisik Barang <span>*</span></label>
-                    <textarea name="deskripsi_fisik" rows="4" placeholder="Contoh: Laptop warna hitam, ada stiker UB, charger terpisah..." required><?= htmlspecialchars($_POST['deskripsi_fisik'] ?? '') ?></textarea>
-                </div>
-
-                <!-- Waktu Ditemukan -->
-                <div class="form-group">
-                    <label>Waktu Ditemukan <span>*</span></label>
-                    <input type="datetime-local" name="waktu" value="<?= htmlspecialchars($_POST['waktu'] ?? '') ?>" required>
-                </div>
-
-                <!-- Tombol -->
-                <button type="submit" class="btn-submit">Laporkan Barang</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // Validasi sederhana
-        document.getElementById('laporanForm').addEventListener('submit', function(e) {
-            const inputs = this.querySelectorAll('input[required], select[required], textarea[required]');
-            let valid = true;
-            inputs.forEach(input => {
-                if (!input.value.trim()) {
-                    input.style.borderColor = '#ef4444';
-                    valid = false;
-                } else {
-                    input.style.borderColor = '#e2e8f0';
-                }
-            });
-            if (!valid) {
-                e.preventDefault();
-                alert('Harap isi semua field yang wajib.');
-            }
-        });
-    </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

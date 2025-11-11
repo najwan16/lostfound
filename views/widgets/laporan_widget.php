@@ -7,7 +7,7 @@ if (!isset($filter)) $filter = 'semua';
 $statusMap = [
     'semua'           => null,
     'belum_ditemukan' => 'belum_ditemukan',
-    'selesai'         => 'ditemukan'
+    'sudah_diambil'         => 'sudah_diambil'
 ];
 
 $targetStatus = $statusMap[$filter] ?? null;
@@ -26,9 +26,9 @@ $filtered = ($filter === 'semua')
     <?php foreach ($filtered as $item): ?>
         <?php
         $dbStatus = $item['status'] ?? 'belum_ditemukan';
-        $isSelesai = $dbStatus === 'ditemukan';
+        $isSelesai = $dbStatus === 'sudah_diambil';
         $statusClass = $isSelesai ? 'status-completed' : 'status-pending';
-        $statusText = $isSelesai ? 'Selesai' : 'Belum Selesai';
+        $statusText = $isSelesai ? 'Sudah Diambil' : 'Belum Ditemukan';
 
         $defaultImg = 'https://via.placeholder.com/300x200/eeeeee/999999?text=No+Image';
         $imgSrc = $defaultImg;
@@ -41,12 +41,12 @@ $filtered = ($filter === 'semua')
         }
         ?>
         <a href="index.php?action=detail_laporan&id=<?= $item['id_laporan'] ?>"
-           class="text-decoration-none text-dark d-block">
+            class="text-decoration-none text-dark d-block">
             <div class="card">
                 <div class="card-image">
                     <img src="<?= htmlspecialchars($imgSrc) ?>"
-                         alt="<?= htmlspecialchars($item['nama_barang'] ?? 'Barang') ?>"
-                         onerror="this.src='<?= $defaultImg ?>';">
+                        alt="<?= htmlspecialchars($item['nama_barang'] ?? 'Barang') ?>"
+                        onerror="this.src='<?= $defaultImg ?>';">
                     <span class="card-status <?= $statusClass ?>">
                         <?= $statusText ?>
                     </span>

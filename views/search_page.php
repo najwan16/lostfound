@@ -2,6 +2,10 @@
 <?php
 require_once 'config/db.php';
 
+// === CEK SESSION ===
+$userRole = $_SESSION['role'] ?? null;
+$userId = $_SESSION['userId'] ?? null;
+
 // Ambil filter dan parameter pencarian
 $filter = $_GET['filter'] ?? 'semua';
 $allowed = ['semua', 'hilang', 'ditemukan'];
@@ -41,7 +45,7 @@ $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 // Query
 $query = "
     SELECT 
-        l.tipe_laporan, l.nama_barang, l.deskripsi_fisik, l.kategori, 
+        l.id_laporan, l.tipe_laporan, l.nama_barang, l.deskripsi_fisik, l.kategori, 
         l.lokasi, l.waktu, l.status, l.created_at,
         a.nama AS nama_pembuat, a.nomor_kontak, c.nomor_induk
     FROM laporan l
@@ -85,6 +89,36 @@ $locations = [
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link href="../css/search.css" rel="stylesheet">
+    <style>
+        .clickable-row {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .clickable-row:hover {
+            background-color: #f8f9fa !important;
+        }
+
+        .clickable-row td {
+            position: relative;
+        }
+
+        .clickable-row::after {
+            content: 'Klik untuk detail';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            color: #007bff;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .clickable-row:hover::after {
+            opacity: 1;
+        }
+    </style>
 </head>
 
 <body>
@@ -164,11 +198,20 @@ $locations = [
                             </thead>
                             <tbody>
                                 <?php foreach ($laporan_list as $i => $l): ?>
-                                    <tr class="<?= $l['tipe_laporan'] === 'hilang' ? 'status-hilang' : 'status-ditemukan' ?>">
+                                    <?php
+                                    // Tentukan URL detail berdasarkan role
+                                    $detailAction = ($userRole === 'satpam')
+                                        ? 'detail_laporan_satpam'
+                                        : 'detail_laporan';
+                                    $detailUrl = "index.php?action={$detailAction}&id={$l['id_laporan']}";
+                                    ?>
+                                    <tr class="clickable-row" data-href="<?= $detailUrl ?>">
                                         <td><?= $i + 1 ?></td>
-                                        <td><span class="badge <?= $l['tipe_laporan'] === 'hilang' ? 'bg-warning' : 'bg-success' ?> badge-tipe">
+                                        <td>
+                                            <span class="badge <?= $l['tipe_laporan'] === 'hilang' ? 'bg-warning' : 'bg-success' ?> badge-tipe">
                                                 <?= ucfirst($l['tipe_laporan']) ?>
-                                            </span></td>
+                                            </span>
+                                        </td>
                                         <td><strong><?= htmlspecialchars($l['nama_barang']) ?></strong></td>
                                         <td><span class="badge bg-primary"><?= ucfirst($l['kategori']) ?></span></td>
                                         <td><?= htmlspecialchars($l['lokasi']) ?></td>
@@ -197,6 +240,16 @@ $locations = [
             </div>
         </div>
     </div>
+
+    <!-- SCRIPT KLIK BARIS -->
+    <script>
+        document.querySelectorAll('.clickable-row').forEach(row => {
+            row.addEventListener('click', function() {
+                const href = this.getAttribute('data-href');
+                if (href) window.location = href;
+            });
+        });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

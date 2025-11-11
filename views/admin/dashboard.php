@@ -4,28 +4,28 @@ require_once dirname(__DIR__, 2) . '/config/db.php';
 require_once dirname(__DIR__, 2) . '/controllers/AuthController.php';
 
 $auth = new AuthController();
-$session = $auth->getSessionManager();
+$sessionManager = $auth->getSessionManager();
 
-if ($session->get('role') !== 'satpam') {
+if ($sessionManager->get('role') !== 'satpam') {
     header('Location: ' . dirname(__DIR__, 2) . '/index.php?action=home');
     exit;
 }
 
 $pdo = getDB();
 $stmt = $pdo->prepare("
-    SELECT 
-        l.id_laporan, l.nama_barang, l.deskripsi_fisik, l.kategori, l.lokasi, l.waktu, l.status, l.created_at,
-        a.nama AS nama_pembuat, a.nomor_kontak, c.nomor_induk
+    SELECT l.id_laporan, l.tipe_laporan, l.nama_barang, l.deskripsi_fisik, l.kategori, 
+           l.lokasi, l.waktu, l.status, l.created_at,
+           a.nama AS nama_pembuat, a.nomor_kontak, c.nomor_induk
     FROM laporan l
     JOIN akun a ON l.id_akun = a.id_akun
     LEFT JOIN civitas c ON a.id_akun = c.id_akun
-    WHERE l.tipe_laporan = 'hilang'
     ORDER BY l.created_at DESC
 ");
 $stmt->execute();
 $laporan_list = $stmt->fetchAll();
 
-$root = dirname(__DIR__, 2);
+$current_page = 'dashboard';
+$page_title = 'Dashboard Satpam';
 ?>
 
 <!DOCTYPE html>
@@ -34,123 +34,106 @@ $root = dirname(__DIR__, 2);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Satpam</title>
+    <title><?= $page_title ?></title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background: #f8f9fa;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        .card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .header {
-            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-            color: white;
-            padding: 2rem;
-            border-radius: 16px 16px 0 0;
-            text-align: center;
-        }
-
-        .table th {
-            background-color: #e3f2fd;
-            font-weight: 600;
-        }
-
-        .badge-status {
-            font-size: 0.85rem;
-        }
-
-        .pembuat {
-            font-size: 0.9rem;
-            color: #555;
-        }
-
-        .nim {
-            font-weight: bold;
-            color: #1e40af;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="..//css/admin.css" rel="stylesheet">
 </head>
 
 <body>
-    <div class="container mt-4">
-        <div class="card">
-            <div class="header">
-                <h3 class="mb-0">Dashboard Satpam</h3>
-                <p class="mb-0">Selamat datang, <strong><?= htmlspecialchars($session->get('nama')) ?></strong></p>
-            </div>
 
-            <div class="card-body p-4">
-                <h5 class="mb-4">Daftar Laporan Barang Hilang</h5>
+    <!-- SIDEBAR -->
+    <?php include 'widgets/sidebar.php'; ?>
 
-                <?php if (empty($laporan_list)): ?>
-                    <div class="alert alert-info text-center">
-                        <strong>Belum ada laporan hilang saat ini.</strong>
-                    </div>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Barang</th>
-                                    <th>Deskripsi</th>
-                                    <th>Kategori</th>
-                                    <th>Lokasi</th>
-                                    <th>Waktu Hilang</th>
-                                    <th>Status</th>
-                                    <th>Dibuat</th>
-                                    <th>Pembuat</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($laporan_list as $i => $l): ?>
-                                    <tr>
-                                        <td><?= $i + 1 ?></td>
-                                        <td><strong><?= htmlspecialchars($l['nama_barang']) ?></strong></td>
-                                        <td><?= htmlspecialchars($l['deskripsi_fisik'] ?: '-') ?></td>
-                                        <td><span class="badge bg-primary"><?= ucfirst($l['kategori']) ?></span></td>
-                                        <td><?= htmlspecialchars($l['lokasi']) ?></td>
-                                        <td><?= date('d M Y, H:i', strtotime($l['waktu'])) ?></td>
-                                        <td>
-                                            <span class="badge <?= $l['status'] === 'belum_ditemukan' ? 'bg-warning text-dark' : 'bg-success' ?>">
-                                                <?= ucfirst(str_replace('_', ' ', $l['status'])) ?>
-                                            </span>
-                                        </td>
-                                        <td><?= date('d M Y', strtotime($l['created_at'])) ?></td>
-                                        <td>
-                                            <div class="pembuat">
-                                                <strong><?= htmlspecialchars($l['nama_pembuat']) ?></strong><br>
-                                                <small class="text-muted"><?= htmlspecialchars($l['nomor_kontak']) ?></small>
-                                                <?php if ($l['nomor_induk']): ?>
-                                                    <div class="nim">NIM: <?= htmlspecialchars($l['nomor_induk']) ?></div>
-                                                <?php endif; ?>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
+    <!-- HEADER -->
+    <?php include 'widgets/header.php'; ?>
 
-                <!-- TOMBOL AKSI -->
-                <div class="text-center mt-4">
-                    <a href="index.php?action=laporan_ditemukan_form" class="btn btn-success btn-lg me-3">
-                        Lapor Barang Ditemukan
-                    </a>
-                    <a href="/logout.php" class="btn btn-outline-danger btn-lg">Logout</a>
-                </div>
-            </div>
+    <!-- CARD: DAFTAR LAPORAN -->
+    <?php
+    $card_header = '<i class="bi bi-list-ul"></i> Semua Laporan Barang <small class="text-white-50">(Hilang & Ditemukan)</small>';
+    $header_class = 'bg-gradient-primary';
+    ob_start();
+    ?>
+    <?php if (empty($laporan_list)): ?>
+        <div class="alert alert-info text-center">
+            Belum ada laporan saat ini.
         </div>
+    <?php else: ?>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Tipe</th>
+                        <th>Barang</th>
+                        <th>Deskripsi</th>
+                        <th>Kategori</th>
+                        <th>Lokasi</th>
+                        <th>Waktu</th>
+                        <th>Status</th>
+                        <th>Dibuat</th>
+                        <th>Pembuat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($laporan_list as $i => $l): ?>
+                        <?php
+                        $tipeBadge = $l['tipe_laporan'] === 'hilang' ? 'bg-warning text-dark' : 'bg-success text-white';
+                        $tipeText = $l['tipe_laporan'] === 'hilang' ? 'Hilang' : 'Ditemukan';
+                        ?>
+                        <tr class="clickable-row" data-href="../../index.php?action=detail_laporan_satpam&id=<?= $l['id_laporan'] ?>">
+                            <td><?= $i + 1 ?></td>
+                            <td><span class="badge <?= $tipeBadge ?> badge-tipe"><?= $tipeText ?></span></td>
+                            <td><strong><?= htmlspecialchars($l['nama_barang']) ?></strong></td>
+                            <td class="text-truncate" style="max-width:150px;"><?= htmlspecialchars($l['deskripsi_fisik'] ?: '-') ?></td>
+                            <td><span class="badge bg-primary"><?= ucfirst($l['kategori']) ?></span></td>
+                            <td><?= htmlspecialchars($l['lokasi']) ?></td>
+                            <td><small><?= date('d M Y', strtotime($l['waktu'])) ?><br><?= date('H:i', strtotime($l['waktu'])) ?></small></td>
+                            <td>
+                                <span class="badge <?= $l['status'] === 'belum_ditemukan' ? 'bg-warning text-dark' : 'bg-success' ?>">
+                                    <?= ucfirst(str_replace('_', ' ', $l['status'])) ?>
+                                </span>
+                            </td>
+                            <td><?= date('d M Y', strtotime($l['created_at'])) ?></td>
+                            <td>
+                                <div class="pembuat">
+                                    <strong><?= htmlspecialchars($l['nama_pembuat']) ?></strong><br>
+                                    <small class="text-muted"><?= htmlspecialchars($l['nomor_kontak']) ?></small>
+                                    <?php if ($l['nomor_induk']): ?>
+                                        <div class="nim">NIM: <?= htmlspecialchars($l['nomor_induk']) ?></div>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+
+    <div class="text-center mt-4">
+        <a href="../../index.php?action=laporan_ditemukan_form" class="btn btn-success btn-lg">
+            Lapor Barang Ditemukan
+        </a>
     </div>
 
+    <?php
+    $card_content = ob_get_clean();
+    include 'widgets/card.php';
+    ?>
+
+    </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.clickable-row').forEach(row => {
+            row.addEventListener('click', () => {
+                window.location = row.dataset.href;
+            });
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
