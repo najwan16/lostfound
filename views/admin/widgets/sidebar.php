@@ -24,19 +24,19 @@ $fallback_logo = 'https://via.placeholder.com/80x80/ffffff/E57229?text=LOGO';
 
         <!-- NAVIGASI UTAMA -->
         <div class="sidebar-btn">
-            <a href="../../index.php?action=dashboard"
-                class="sidebar-item <?= $current_page === 'dashboard' ? 'active' : '' ?>">
+            <a href="../../index.php?action=dashboard_kotak_masuk"
+                class="sidebar-item <?= $current_page === 'dashboard_kotak_masuk' ? 'active' : '' ?>">
                 <span class="material-symbols-outlined">inbox</span>
                 <span class="text">Kotak Masuk</span>
             </a>
-            <a href="../../index.php?action=laporan_ditemukan_form"
-                class="sidebar-item <?= $current_page === 'laporan_ditemukan' ? 'active' : '' ?>">
+            <a href="../../index.php?action=dashboard"
+                class="sidebar-item <?= $current_page === 'dashboard' ? 'active' : '' ?>">
                 <span class="material-symbols-outlined">assignment</span>
                 <span class="text">Laporan</span>
             </a>
             <a href="../../index.php?action=dashboard_klaim"
-                class="sidebar-item <?= $current_page === 'klaim' ? 'active' : '' ?>">
-                <span class="material-symbols-outlined">checked_bag_question</span>
+                class="sidebar-item <?= $current_page === 'dashboard_klaim' ? 'active' : '' ?>">
+                <span class="material-symbols-outlined">fact_check</span>
                 <span class="text">Klaim</span>
             </a>
 

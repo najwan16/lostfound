@@ -54,14 +54,6 @@ $imgSrc = $laporan['foto'] ? "/{$laporan['foto']}" : 'https://via.placeholder.co
     <div class="main-content">
         <div class="container-fluid p-4">
 
-            <!-- PAGE HEADER -->
-            <div class="page-header mb-4">
-                <h3 class="mb-1">Detail Laporan #<?= $id_laporan ?></h3>
-                <p class="text-muted mb-0">
-                    Selamat datang, <strong><?= htmlspecialchars($_SESSION['nama'] ?? 'Satpam') ?></strong>
-                </p>
-            </div>
-
             <!-- CARD: DETAIL LAPORAN -->
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-gradient-primary text-white">

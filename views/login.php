@@ -39,9 +39,9 @@
                 </div>
                 <button type="submit" class="btn btn-primary w-100" aria-label="Login">Login</button>
             </form>
-            <p class="text-center mt-3">
+            <!-- <p class="text-center mt-3">
                 <a href="../index.php?action=register">Buat Akun</a>
-            </p>
+            </p> -->
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

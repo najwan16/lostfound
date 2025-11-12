@@ -66,13 +66,7 @@ $page_title = 'Lapor Barang Ditemukan';
     <div class="main-content">
         <div class="container-fluid p-4">
 
-            <!-- PAGE HEADER -->
-            <div class="page-header mb-4">
-                <h3 class="mb-1"><?= $page_title ?></h3>
-                <p class="text-muted mb-0">
-                    Selamat datang, <strong><?= htmlspecialchars($sessionManager->get('nama')) ?></strong>
-                </p>
-            </div>
+           
 
             <!-- ALERT -->
             <?php if (!empty($alert_message)): ?>

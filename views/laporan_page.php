@@ -46,8 +46,17 @@
                             <?= $f['label'] ?>
                         </a>
                     <?php endforeach; ?>
+                    <!-- Setelah tombol "Lapor Kehilangan" -->
+<div class="text-center mt-4">
+    <a href="index.php?action=klaim_saya" class="btn btn-primary px-5">
+        Lihat Pengajuan Klaim Saya
+    </a>
+</div>
                 </div>
+                
             </div>
+
+            
 
             <!-- Cards Grid -->
             <div class="cards-grid">
@@ -64,6 +73,7 @@
                 include __DIR__ . '/widgets/laporan_widget.php';
                 echo ob_get_clean();
                 ?>
+                
             </div>
         </div>
     </div>

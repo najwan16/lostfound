@@ -348,6 +348,7 @@ switch ($action) {
             header('Location: index.php?action=home');
             exit;
         }
+        $current_page = 'dashboard';
         include 'views/admin/dashboard.php';
         break;
 
@@ -534,6 +535,15 @@ switch ($action) {
         exit;
         break;
 
+    case 'dashboard_kotak_masuk':
+        if ($userRole !== 'satpam') {
+            header('Location: index.php?action=home');
+            exit;
+        }
+        $current_page = 'dashboard_kotak_masuk';
+        include 'views/admin/dashboard_kotak_masuk.php';
+        break;
+
     // ==================================================================
     // LOGOUT (opsional, tambahkan link di view)
     // ==================================================================
@@ -555,6 +565,12 @@ switch ($action) {
             header('Location: index.php?action=home');
             exit;
         }
+        $current_page = 'dashboard_klaim';
         include 'views/admin/dashboard_klaim.php';
+        break;
+
+
+    case 'klaim_saya':
+        include 'views/widgets/claim_widget.php';
         break;
 }

@@ -1,0 +1,143 @@
+/* ========================================
+   KOTAK MASUK - LOST & FOUND FILKOM
+   ======================================== */
+
+.section-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+.laporan-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.laporan-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+    border: 1px solid var(--gray-200);
+}
+
+.laporan-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-light);
+}
+
+.laporan-info h6 {
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    font-size: 1.05rem;
+}
+
+.laporan-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.meta-item .material-symbols-outlined {
+    font-size: 1rem;
+    color: var(--primary);
+}
+
+.laporan-time {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    white-space: nowrap;
+}
+
+.laporan-action .btn-cocok {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.laporan-action .btn-cocok:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+/* Responsif */
+@media (max-width: 992px) {
+    .laporan-card {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        padding: 1rem;
+    }
+
+    .laporan-info,
+    .laporan-time,
+    .laporan-action {
+        width: 100%;
+        margin-bottom: 0.75rem;
+    }
+
+    .laporan-action {
+        margin-top: 0.5rem;
+        margin-bottom: 0;
+    }
+
+    .laporan-action .btn-cocok {
+        width: 100%;
+        text-align: center;
+    }
+
+    .laporan-time {
+        order: -1;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+}
+
+@media (max-width: 576px) {
+    .section-title {
+        font-size: 1.25rem;
+    }
+
+    .laporan-info h6 {
+        font-size: 1rem;
+    }
+
+    .laporan-meta {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}

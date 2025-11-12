@@ -87,14 +87,6 @@ $page_title = match ($tab) {
     <div class="main-content">
         <div class="container-fluid p-4">
 
-            <!-- PAGE HEADER -->
-            <div class="page-header mb-4">
-                <h3 class="mb-1"><?= $page_title ?></h3>
-                <p class="text-muted mb-0">
-                    Selamat datang, <strong><?= htmlspecialchars($sessionManager->get('nama')) ?></strong>
-                </p>
-            </div>
-
             <!-- TAB NAVIGATION -->
             <ul class="nav nav-tabs mb-4" id="klaimTab" role="tablist">
                 <li class="nav-item" role="presentation">
