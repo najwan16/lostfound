@@ -1,4 +1,4 @@
 <?php
-require_once 'controllers/AuthController.php';
+require_once 'app/Controllers/AuthController.php';
 $controller = new AuthController();
 $controller->logout();

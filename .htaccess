@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Arahkan /uploads/... ke public/uploads/...
+RewriteRule ^uploads/(.*)$ public/uploads/$1 [L]
+
+# Arahkan semua ke public/ jika file tidak ada
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ public/$1 [L]
