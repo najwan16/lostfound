@@ -1,4 +1,5 @@
 <?php
+// app/Models/AkunModel.php
 
 namespace Models;
 
@@ -13,38 +14,42 @@ class AkunModel
         $this->database = getDB();
     }
 
-    public function login($email, $password)
+    /**
+     * Login user berdasarkan email
+     */
+    public function getUserByEmail(string $email)
     {
-        error_log("Login attempt: email=$email");
         $stmt = $this->database->prepare("SELECT * FROM akun WHERE email = :email");
         $stmt->execute(['email' => $email]);
-        $user = $stmt->fetch();
-        error_log("User fetched: " . print_r($user, true));
-
-        if ($user && password_verify($password, $user['password'])) {
-            error_log("Login success for email=$email");
-            return $user;
-        }
-        error_log("Login failed: email or password wrong for email=$email");
-        return false;
+        return $stmt->fetch();
     }
 
-    public function getProfil($idAkun)
+    /**
+     * Ambil profil lengkap user
+     */
+    public function getProfil(int $idAkun)
     {
         $stmt = $this->database->prepare("
-        SELECT a.*, c.nomor_induk, s.id_satpam 
-        FROM akun a 
-        LEFT JOIN civitas c ON a.id_akun = c.id_akun 
-        LEFT JOIN satpam s ON a.id_akun = s.id_akun 
-        WHERE a.id_akun = :id
-    ");
+            SELECT a.*, c.nomor_induk, s.id_satpam 
+            FROM akun a 
+            LEFT JOIN civitas c ON a.id_akun = c.id_akun 
+            LEFT JOIN satpam s ON a.id_akun = s.id_akun 
+            WHERE a.id_akun = :id
+        ");
         $stmt->execute(['id' => $idAkun]);
         return $stmt->fetch();
     }
 
-    public function updateProfil($idAkun, $nama, $nomorKontak)
+    /**
+     * Update profil user
+     */
+    public function updateProfil(int $idAkun, string $nama, string $nomorKontak): bool
     {
-        $stmt = $this->database->prepare("UPDATE akun SET nama = :nama, nomor_kontak = :nomorKontak WHERE id_akun = :id");
+        $stmt = $this->database->prepare("
+            UPDATE akun 
+            SET nama = :nama, nomor_kontak = :nomorKontak 
+            WHERE id_akun = :id
+        ");
         return $stmt->execute([
             'nama' => $nama,
             'nomorKontak' => $nomorKontak,
@@ -52,10 +57,13 @@ class AkunModel
         ]);
     }
 
-    public function getUserByEmail($email)
+    /**
+     * Ambil user berdasarkan ID (untuk remember me)
+     */
+    public function getUserById(int $idAkun)
     {
-        $stmt = $this->database->prepare("SELECT * FROM akun WHERE email = :email");
-        $stmt->execute(['email' => $email]);
+        $stmt = $this->database->prepare("SELECT * FROM akun WHERE id_akun = ?");
+        $stmt->execute([$idAkun]);
         return $stmt->fetch();
     }
 }

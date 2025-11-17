@@ -1,7 +1,23 @@
 /* ========================================
    KOTAK MASUK - LOST & FOUND FILKOM
+   File: public/assets/css/mail.css
    ======================================== */
 
+/* === VARIABEL WARNA & RADIUS (SESUAI TEMA FILKOM) === */
+:root {
+    --primary: #0d6efd;
+    --primary-light: #e7f1ff;
+    --primary-dark: #0b5ed7;
+    --gray-200: #e5e7eb;
+    --gray-600: #4b5563;
+    --gray-800: #1f2937;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+}
+
+/* === SECTION TITLE === */
 .section-title {
     font-size: 1.35rem;
     font-weight: 700;
@@ -9,25 +25,29 @@
     margin-bottom: 1.5rem;
     position: relative;
     padding-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .section-title::after {
     content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 60px;
+    flex: 0 0 60px;
     height: 4px;
     background: var(--primary);
     border-radius: 2px;
 }
 
+/* === DAFTAR NOTIFIKASI === */
 .laporan-list {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    padding: 0;
+    margin: 0;
 }
 
+/* === CARD NOTIFIKASI === */
 .laporan-card {
     background: white;
     border-radius: var(--radius);
@@ -36,14 +56,41 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
     border: 1px solid var(--gray-200);
+    cursor: pointer;
+    position: relative;
 }
 
 .laporan-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     box-shadow: var(--shadow-md);
     border-color: var(--primary-light);
+    background: #fbfcff;
+}
+
+.laporan-card.unread {
+    border-left: 5px solid var(--primary);
+    background: #f8f9ff;
+    font-weight: 500;
+}
+
+.laporan-card.unread::before {
+    content: '';
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 10px;
+    height: 10px;
+    background: var(--primary);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+/* === INFO BARANG === */
+.laporan-info {
+    flex: 1;
+    min-width: 0;
 }
 
 .laporan-info h6 {
@@ -51,6 +98,9 @@
     font-weight: 600;
     color: var(--gray-800);
     font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .laporan-meta {
@@ -58,6 +108,7 @@
     gap: 1rem;
     font-size: 0.875rem;
     color: var(--gray-600);
+    flex-wrap: wrap;
 }
 
 .meta-item {
@@ -71,12 +122,16 @@
     color: var(--primary);
 }
 
+/* === WAKTU === */
 .laporan-time {
     font-size: 0.8rem;
     color: var(--gray-600);
     white-space: nowrap;
+    text-align: right;
+    min-width: 140px;
 }
 
+/* === TOMBOL AKSI === */
 .laporan-action .btn-cocok {
     background: var(--primary);
     color: white;
@@ -87,49 +142,89 @@
     text-decoration: none;
     transition: all 0.2s ease;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .laporan-action .btn-cocok:hover {
     background: var(--primary-dark);
     transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(13, 110, 253, 0.3);
 }
 
-/* Responsif */
+.laporan-action .btn-cocok::after {
+    content: 'chevron_right';
+    font-family: 'Material Symbols Outlined';
+    font-size: 1rem;
+}
+
+/* === ANIMASI PULSE UNTUK NOTIFIKASI BARU === */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   RESPONSIF
+   ======================================== */
+
+/* Tablet & Mobile (max-width: 992px) */
 @media (max-width: 992px) {
     .laporan-card {
         flex-direction: column;
         align-items: flex-start;
         text-align: left;
         padding: 1rem;
+        gap: 0.75rem;
     }
 
     .laporan-info,
     .laporan-time,
     .laporan-action {
         width: 100%;
-        margin-bottom: 0.75rem;
-    }
-
-    .laporan-action {
-        margin-top: 0.5rem;
-        margin-bottom: 0;
-    }
-
-    .laporan-action .btn-cocok {
-        width: 100%;
-        text-align: center;
     }
 
     .laporan-time {
         order: -1;
         margin-bottom: 0.5rem;
         font-weight: 500;
+        text-align: left;
+    }
+
+    .laporan-action {
+        margin-top: 0.5rem;
+    }
+
+    .laporan-action .btn-cocok {
+        width: 100%;
+        justify-content: center;
     }
 }
 
+/* Mobile Kecil (max-width: 576px) */
 @media (max-width: 576px) {
     .section-title {
         font-size: 1.25rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .section-title::after {
+        width: 50px;
     }
 
     .laporan-info h6 {
@@ -139,5 +234,33 @@
     .laporan-meta {
         flex-direction: column;
         gap: 0.25rem;
+    }
+
+    .laporan-card {
+        padding: 1rem;
+    }
+
+    .laporan-action .btn-cocok {
+        font-size: 0.8rem;
+        padding: 0.6rem 0.8rem;
+    }
+}
+
+/* Dark Mode Support (Opsional) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --gray-200: #374151;
+        --gray-600: #9ca3af;
+        --gray-800: #f3f4f6;
+    }
+
+    .laporan-card {
+        background: #1f2937;
+        border-color: #374151;
+        color: #f3f4f6;
+    }
+
+    .laporan-card.unread {
+        background: #1e2938;
     }
 }

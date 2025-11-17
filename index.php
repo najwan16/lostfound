@@ -2,37 +2,47 @@
 
 /**
  * ==================================================================
- *  MAIN ROUTER & CONTROLLER INITIALIZATION
+ *  SISTEM INFORMASI PENEMUAN & PENGELOLAAN BARANG HILANG
  *  File: index.php
- *  Deskripsi: Entry point aplikasi, mengatur routing berdasarkan action
- * ==================================================================
+ *  Entry Point Aplikasi
+ *  Author: Kelompok 1 RSI 2025
+ *  ==================================================================
  */
 
 date_default_timezone_set('Asia/Jakarta');
 session_start();
 
+// ==================================================================
+//  REQUIRE & INISIALISASI CONTROLLERS
+// ==================================================================
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/app/Controllers/AuthController.php';
 require_once __DIR__ . '/app/Controllers/ProfileController.php';
 require_once __DIR__ . '/app/Controllers/LaporanController.php';
 require_once __DIR__ . '/app/Controllers/ClaimController.php';
+require_once __DIR__ . '/app/Controllers/NotifikasiController.php';
 
-// Inisialisasi controller
-$authController     = new AuthController();
-$sessionManager     = $authController->getSessionManager();
-$profileController  = new ProfileController($sessionManager);
-$laporanController  = new LaporanController($sessionManager);
-$claimController    = new ClaimController($sessionManager);
+// Inisialisasi
+$authController       = new AuthController();
+$sessionManager       = $authController->getSessionManager();
+$profileController    = new ProfileController($sessionManager);
+$laporanController    = new LaporanController($sessionManager);
+$claimController      = new ClaimController($sessionManager);
+$notifikasiController = new NotifikasiController($sessionManager);
 
-// Tentukan action default
+// ==================================================================
+//  TENTUKAN ACTION
+// ==================================================================
 $action = $_GET['action'] ?? 'home';
 
-// Cek status login & role
+// ==================================================================
+//  CEK STATUS LOGIN & ROLE
+// ==================================================================
 $isLoggedIn = $sessionManager->get('userId') !== null;
 $userRole   = $sessionManager->get('role');
 
 // ==================================================================
-//  REDIRECT LOGIC BERDASARKAN STATUS LOGIN & ROLE
+//  REDIRECT LOGIC
 // ==================================================================
 
 if ($isLoggedIn) {
@@ -45,15 +55,24 @@ if ($isLoggedIn) {
     $protectedActions = [
         'profile',
         'update_profile',
+        'laporan',
         'laporan-form',
         'submit_laporan',
         'search',
-        'dashboard',
+        'laporan-detail',
+        'search_civitas',
         'claim',
         'submit_claim',
         'claim_saya',
+        'dashboard',
         'dashboard_claim',
-        'verifikasi_claim'
+        'verifikasi_claim',
+        'laporanSatpam-form',
+        'submit_laporan_ditemukan',
+        'laporanSatpam-detail',
+        'catat_pengambil',
+        'mail',
+        'mark_as_read'
     ];
     if (in_array($action, $protectedActions)) {
         header('Location: index.php?action=login');
@@ -62,20 +81,20 @@ if ($isLoggedIn) {
 }
 
 // ==================================================================
-//  ROUTING SWITCH - ACTION HANDLER
+//  ROUTING SWITCH
 // ==================================================================
 
 switch ($action) {
 
     // ==================================================================
-    //  HALAMAN UMUM (PUBLIC)
+    //  HALAMAN UMUM
     // ==================================================================
     case 'home':
-        include 'app/Views/civitas/home.php';
+        require_once 'app/Views/civitas/home.php';
         break;
 
     // ==================================================================
-    //  AUTHENTICATION: LOGIN
+    //  AUTH: LOGIN
     // ==================================================================
     case 'login':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -95,11 +114,11 @@ switch ($action) {
                 $success = false;
             }
         }
-        include 'app/Views/auth/login.php';
+        require_once 'app/Views/auth/login.php';
         break;
 
     // ==================================================================
-    //  AUTHENTICATION: REGISTER
+    //  AUTH: REGISTER
     // ==================================================================
     case 'register':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -113,7 +132,7 @@ switch ($action) {
             if (empty($email) || empty($password) || empty($nama) || empty($nomor_kontak) || empty($role)) {
                 $success = false;
                 $message = 'Semua field wajib diisi';
-                include 'app/Views/auth/register.php';
+                require_once 'app/Views/auth/register.php';
                 break;
             }
 
@@ -121,13 +140,13 @@ switch ($action) {
                 if (!preg_match('/@(student\.)?ub\.ac\.id$/i', $email)) {
                     $success = false;
                     $message = 'Civitas harus menggunakan email UB';
-                    include 'app/Views/auth/register.php';
+                    require_once 'app/Views/auth/register.php';
                     break;
                 }
                 if (empty($nomor_induk)) {
                     $success = false;
                     $message = 'NIM/NIP wajib diisi';
-                    include 'app/Views/auth/register.php';
+                    require_once 'app/Views/auth/register.php';
                     break;
                 }
             }
@@ -135,7 +154,7 @@ switch ($action) {
             if ($role === 'satpam' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $success = false;
                 $message = 'Format email tidak valid';
-                include 'app/Views/auth/register.php';
+                require_once 'app/Views/auth/register.php';
                 break;
             }
 
@@ -144,7 +163,7 @@ switch ($action) {
             if ($stmt->fetch()) {
                 $success = false;
                 $message = 'Email sudah terdaftar';
-                include 'app/Views/auth/register.php';
+                require_once 'app/Views/auth/register.php';
                 break;
             }
 
@@ -170,29 +189,31 @@ switch ($action) {
                 getDB()->rollBack();
                 $success = false;
                 $message = 'Gagal membuat akun: ' . $e->getMessage();
+                require_once 'app/Views/auth/register.php';
             }
+            break;
         }
-        include 'app/Views/auth/register.php';
+        require_once 'app/Views/auth/register.php';
         break;
 
     // ==================================================================
-    //  PROFILE: CIVITAS
+    //  PROFILE
     // ==================================================================
     case 'profile':
         $result = $profileController->showProfile();
         $profil = $result['success'] ? $result['profil'] : [];
-        include 'app/Views/civitas/profile.php';
+        require_once 'app/Views/civitas/profile.php';
         break;
 
     case 'update_profile':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $nama = $_POST['nama'] ?? '';
-            $nomorKontak = $_POST['nomorKontak'] ?? '';
-            $result = $profileController->updateProfile($nama, $nomorKontak);
-            $profil = $profileController->showProfile()['profil'] ?? [];
-            $success = $result['success'];
-            $message = $result['message'];
-            include 'app/Views/civitas/profile.php';
+            $nama        = trim($_POST['nama'] ?? '');
+            $nomorKontak = trim($_POST['nomorKontak'] ?? '');
+            $result      = $profileController->updateProfile($nama, $nomorKontak);
+            $profil      = $profileController->showProfile()['profil'] ?? [];
+            $success     = $result['success'];
+            $message     = $result['message'];
+            require_once 'app/Views/civitas/profile.php';
         } else {
             header('Location: index.php?action=profile');
             exit;
@@ -207,38 +228,36 @@ switch ($action) {
         break;
 
     case 'laporan-form':
-        include 'app/Views/civitas/laporan-form.php';
+        require_once 'app/Views/civitas/laporan-form.php';
         break;
 
     case 'submit_laporan':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $namaBarang     = trim($_POST['nama_barang'] ?? '');
             $deskripsiFisik = trim($_POST['deskripsi_fisik'] ?? '');
-            $kategori       = trim($_POST['kategori'] ?? '');
-            $lokasi         = trim($_POST['lokasi'] ?? '');
-            $waktu          = trim($_POST['waktu'] ?? '');
+            $kategori       = $_POST['kategori'] ?? '';
+            $lokasi         = $_POST['lokasi'] ?? '';
+            $waktu          = $_POST['waktu'] ?? '';
             $file           = $_FILES['foto'] ?? null;
 
             $result = $laporanController->submitLaporanHilang($namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu, $file);
             $success = $result['success'];
             $message = $result['message'];
-            include 'app/Views/civitas/laporan-form.php';
+            require_once 'app/Views/civitas/laporan-form.php';
         }
         break;
 
     case 'search':
-        $result = $laporanController->getRiwayatLaporan();
-        $riwayat = $result['riwayat'] ?? [];
-        include 'app/Views/civitas/search.php';
+        require_once 'app/Views/civitas/search.php';
         break;
 
     case 'laporan-detail':
         $id = (int)($_GET['id'] ?? 0);
         if ($id <= 0) {
-            include 'app/Views/error.php';
+            require_once 'app/Views/error.php';
             break;
         }
-        include 'app/Views/civitas/laporan-detail.php';
+        require_once 'app/Views/civitas/laporan-detail.php';
         break;
 
     case 'search_civitas':
@@ -246,7 +265,7 @@ switch ($action) {
         break;
 
     // ==================================================================
-    //  CLAIM: CIVITAS & SATPAM
+    //  CLAIM: CIVITAS
     // ==================================================================
     case 'claim':
         $claimController->showForm();
@@ -260,12 +279,16 @@ switch ($action) {
         $claimController->showMyClaims();
         break;
 
+    // ==================================================================
+    //  CLAIM: SATPAM
+    // ==================================================================
     case 'dashboard_claim':
         if ($userRole !== 'satpam') {
-            error_log("Akses dashboard_claim ditolak, role: " . ($userRole ?: 'tidak ada'));
             header('Location: index.php?action=home');
             exit;
         }
+        $GLOBALS['sessionManager'] = $sessionManager;
+        $GLOBALS['current_page'] = 'dashboard_claim';
         $claimController->showDashboard();
         break;
 
@@ -281,8 +304,9 @@ switch ($action) {
             header('Location: index.php?action=home');
             exit;
         }
-        $current_page = 'dashboard';
-        include 'app/Views/admin/dashboard.php';
+        $GLOBALS['sessionManager'] = $sessionManager;
+        $GLOBALS['current_page'] = 'dashboard';
+        require_once 'app/Views/admin/dashboard.php';
         break;
 
     case 'laporanSatpam-form':
@@ -290,7 +314,7 @@ switch ($action) {
             header('Location: index.php?action=login');
             exit;
         }
-        include 'app/Views/admin/laporanSatpam-form.php';
+        require_once 'app/Views/admin/laporanSatpam-form.php';
         break;
 
     case 'submit_laporan_ditemukan':
@@ -314,7 +338,7 @@ switch ($action) {
             header('Location: index.php?action=login');
             exit;
         }
-        include 'app/Views/admin/laporanSatpam-detail.php';
+        require_once 'app/Views/admin/laporanSatpam-detail.php';
         break;
 
     case 'catat_pengambil':
@@ -334,12 +358,7 @@ switch ($action) {
             exit;
         }
 
-        $stmt = getDB()->prepare("
-            SELECT a.nama, c.nomor_induk 
-            FROM akun a 
-            JOIN civitas c ON a.id_akun = c.id_akun 
-            WHERE c.nomor_induk = ? AND a.role = 'civitas'
-        ");
+        $stmt = getDB()->prepare("SELECT a.nama, c.nomor_induk FROM akun a JOIN civitas c ON a.id_akun = c.id_akun WHERE c.nomor_induk = ? AND a.role = 'civitas'");
         $stmt->execute([$nim_pengambil]);
         $civitas = $stmt->fetch();
         if (!$civitas) {
@@ -377,10 +396,7 @@ switch ($action) {
 
         $stmt = getDB()->prepare("
             UPDATE laporan 
-            SET status = 'sudah_diambil', 
-                nim_pengambil = ?, 
-                foto_bukti = ?, 
-                waktu_diambil = ?
+            SET status = 'sudah_diambil', nim_pengambil = ?, foto_bukti = ?, waktu_diambil = ?
             WHERE id_laporan = ? AND status != 'sudah_diambil'
         ");
         $stmt->execute([$nim_pengambil, $fotoPath, $waktu_diambil, $id_laporan]);
@@ -395,20 +411,30 @@ switch ($action) {
         exit;
         break;
 
+    // ==================================================================
+    //  NOTIFIKASI: SATPAM
+    // ==================================================================
     case 'mail':
-        if ($userRole !== 'satpam') {
-            header('Location: index.php?action=home');
-            exit;
-        }
-        $current_page = 'mail';
-        include 'app/Views/admin/mail.php';
+        $GLOBALS['sessionManager'] = $sessionManager;
+        $GLOBALS['current_page'] = 'mail';
+        $notifikasiController->index();
         break;
 
+    case 'mark_as_read':
+        $notifikasiController->markAsRead();
+        break;
+
+    // ==================================================================
+    //  LOGOUT
+    // ==================================================================
     case 'logout':
         $authController->logout();
         header('Location: index.php?action=home');
         exit;
 
+        // ==================================================================
+        //  DEFAULT
+        // ==================================================================
     default:
         header('Location: index.php?action=home');
         exit;

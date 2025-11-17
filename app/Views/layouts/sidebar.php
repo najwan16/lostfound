@@ -1,12 +1,17 @@
 <?php
-// PASTIKAN $sessionManager ADA!
-if (!isset($sessionManager) || $sessionManager->get('role') !== 'satpam') {
+// app/Views/layouts/sidebar.php
+
+// AMBIL DARI CONTROLLER VIA GLOBALS
+$sessionManager = $GLOBALS['sessionManager'] ?? null;
+$current_page   = $GLOBALS['current_page'] ?? '';
+
+// CEK AKSES
+if (!$sessionManager || $sessionManager->get('role') !== 'satpam') {
     header('Location: index.php?action=login');
     exit;
 }
 
-$current_page = $current_page ?? '';
-$logo_path = '/public/assets/images/head.png';
+$logo_path     = '/public/assets/images/head.png';
 $fallback_logo = 'https://via.placeholder.com/80x80/ffffff/E57229?text=LOGO';
 ?>
 

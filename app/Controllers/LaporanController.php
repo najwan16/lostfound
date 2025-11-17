@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . '/../models/LaporanModel.php';
+// app/Controllers/LaporanController.php
+
+require_once __DIR__ . '/../Models/LaporanModel.php';
 
 use Models\LaporanModel;
 
@@ -14,9 +16,11 @@ class LaporanController
         $this->session = $sessionManager;
     }
 
+    // ==================================================================
+    //  LAPORAN HILANG - CIVITAS
+    // ==================================================================
     public function submitLaporanHilang($namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu, $file = null)
     {
-        // 1. Validasi input wajib
         if (empty($namaBarang) || empty($deskripsiFisik) || empty($kategori) || empty($lokasi) || empty($waktu)) {
             return ['success' => false, 'message' => 'Semua field wajib diisi'];
         }
@@ -28,28 +32,22 @@ class LaporanController
 
         $fotoPath = null;
 
-        // 2. PROSES UPLOAD GAMBAR
         if ($file && $file['error'] === UPLOAD_ERR_OK) {
-
-            // Validasi ukuran (max 2MB)
             if ($file['size'] > 2 * 1024 * 1024) {
                 return ['success' => false, 'message' => 'Ukuran gambar maksimal 2MB'];
             }
 
-            // Validasi ekstensi
             $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
             $allowed = ['jpg', 'jpeg', 'png', 'gif'];
             if (!in_array($ext, $allowed)) {
                 return ['success' => false, 'message' => 'Format gambar tidak didukung. Gunakan JPG, PNG, atau GIF'];
             }
 
-            // PERBAIKAN: Upload ke public/uploads/laporan/
             $uploadDir = __DIR__ . '/../../public/uploads/laporan/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
 
-            // --- BERSIHKAN NAMA + TAMBAHKAN ID USER ---
             $cleanName = preg_replace('/[^a-zA-Z0-9\s\-]/', '', $namaBarang);
             $cleanName = preg_replace('/\s+/', '-', trim($cleanName));
             $cleanName = strtolower($cleanName);
@@ -59,35 +57,55 @@ class LaporanController
 
             $date = date('Ymd');
             $random = rand(1000, 9999);
-
             $newName = "laporan_{$idAkun}_{$cleanName}_{$date}_{$random}.{$ext}";
-            // --- AKHIR ---
-
             $destination = $uploadDir . $newName;
 
-            // Upload file
             if (move_uploaded_file($file['tmp_name'], $destination)) {
-                // PERBAIKAN: Simpan path relatif tanpa "public/"
                 $fotoPath = 'uploads/laporan/' . $newName;
             } else {
                 return ['success' => false, 'message' => 'Gagal mengunggah gambar ke server'];
             }
         }
 
-        // 3. SIMPAN KE DATABASE
-        $result = $this->model->simpanLaporanHilang(
-            $idAkun,
-            $namaBarang,
-            $deskripsiFisik,
-            $kategori,
-            $lokasi,
-            $waktu,
-            $fotoPath
-        );
+        $result = $this->model->simpanLaporanHilang($idAkun, $namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu, $fotoPath);
+        return $result;
+    }
+
+    // ==================================================================
+    //  LAPORAN DITEMUKAN - SATPAM (TRIGGER NOTIFIKASI)
+    // ==================================================================
+    public function submitLaporanDitemukan($namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu)
+    {
+        if (empty($namaBarang) || empty($deskripsiFisik) || empty($kategori) || empty($lokasi) || empty($waktu)) {
+            return ['success' => false, 'message' => 'Semua field wajib diisi'];
+        }
+
+        $idAkun = $this->session->get('userId');
+        if (!$idAkun || $this->session->get('role') !== 'satpam') {
+            return ['success' => false, 'message' => 'Akses ditolak'];
+        }
+
+        $pdo = getDB();
+        $stmt = $pdo->prepare("SELECT id_satpam FROM satpam WHERE id_akun = ?");
+        $stmt->execute([$idAkun]);
+        if (!$stmt->fetch()) {
+            return ['success' => false, 'message' => 'Akses ditolak: Anda bukan satpam resmi'];
+        }
+
+        $result = $this->model->simpanLaporanDitemukan($idAkun, $namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu);
+
+        // KIRIM NOTIFIKASI JIKA SUKSES
+        if ($result['success']) {
+            $idLaporan = $pdo->lastInsertId();
+            $this->model->kirimNotifikasiPencocokan($idLaporan);
+        }
 
         return $result;
     }
 
+    // ==================================================================
+    //  RIWAYAT & HALAMAN
+    // ==================================================================
     public function getRiwayatLaporan()
     {
         $idAkun = $this->session->get('userId');
@@ -110,39 +128,6 @@ class LaporanController
         return ['success' => true, 'laporan' => $laporan];
     }
 
-    public function submitLaporanDitemukan($namaBarang, $deskripsiFisik, $kategori, $lokasi, $waktu)
-    {
-        if (empty($namaBarang) || empty($deskripsiFisik) || empty($kategori) || empty($lokasi) || empty($waktu)) {
-            return ['success' => false, 'message' => 'Semua field wajib diisi'];
-        }
-
-        $idAkun = $this->session->get('userId');
-        if (!$idAkun || $this->session->get('role') !== 'satpam') {
-            return ['success' => false, 'message' => 'Akses ditolak'];
-        }
-
-        // === VALIDASI: CEK TABEL satpam PAKAI getDB() GLOBAL ===
-        $pdo = getDB();
-        $stmt = $pdo->prepare("SELECT id_satpam FROM satpam WHERE id_akun = ?");
-        $stmt->execute([$idAkun]);
-        if (!$stmt->fetch()) {
-            return ['success' => false, 'message' => 'Akses ditolak: Anda bukan satpam resmi'];
-        }
-        // === AKHIR VALIDASI ===
-
-        $result = $this->model->simpanLaporanDitemukan(
-            $idAkun,
-            $namaBarang,
-            $deskripsiFisik,
-            $kategori,
-            $lokasi,
-            $waktu
-        );
-
-        return $result;
-    }
-
-    // app/Controllers/LaporanController.php
     public function showLaporanPage()
     {
         $result = $this->getLaporanUser();
@@ -153,9 +138,9 @@ class LaporanController
 
         require_once 'app/Views/civitas/laporan.php';
     }
+
     public function searchCivitas()
     {
-        // Cek akses satpam
         if ($this->session->get('role') !== 'satpam') {
             http_response_code(403);
             echo json_encode([]);
@@ -170,13 +155,13 @@ class LaporanController
 
         $pdo = getDB();
         $stmt = $pdo->prepare("
-        SELECT a.nama, c.nomor_induk 
-        FROM akun a
-        JOIN civitas c ON a.id_akun = c.id_akun
-        WHERE a.role = 'civitas' AND c.nomor_induk LIKE ?
-        ORDER BY c.nomor_induk
-        LIMIT 10
-    ");
+            SELECT a.nama, c.nomor_induk 
+            FROM akun a
+            JOIN civitas c ON a.id_akun = c.id_akun
+            WHERE a.role = 'civitas' AND c.nomor_induk LIKE ?
+            ORDER BY c.nomor_induk
+            LIMIT 10
+        ");
         $stmt->execute(["%$nim%"]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
