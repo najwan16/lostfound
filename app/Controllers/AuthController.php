@@ -73,6 +73,8 @@ class AuthController
     /**
      * Login user dan simpan session
      */
+    // app/Controllers/AuthController.php
+
     public function login(string $email, string $password): array
     {
         $email = trim($email);
@@ -97,8 +99,22 @@ class AuthController
             $this->session->set('nim', $profil['nomor_induk'] ?? '');
         }
 
+        // === CEK NOMOR KONTAK ===
+        $nomorKontak = trim($user['nomor_kontak'] ?? '');
+        if (empty($nomorKontak)) {
+            // Tandai bahwa user perlu isi nomor kontak
+            $this->session->set('require_contact', true);
+            return [
+                'success' => true,
+                'require_contact' => true,
+                'role' => $user['role'],
+                'message' => 'Silakan lengkapi nomor telepon'
+            ];
+        }
+
         return [
             'success' => true,
+            'require_contact' => false,
             'role' => $user['role'],
             'message' => 'Login berhasil'
         ];
@@ -144,5 +160,36 @@ class AuthController
     public function getRole(): ?string
     {
         return $this->session->get('role');
+    }
+
+    public function updateKontak(string $nomor): array
+    {
+        $userId = $this->session->get('userId');
+        if (!$userId) {
+            return ['success' => false, 'message' => 'Unauthorized'];
+        }
+
+        // Normalisasi nomor
+        $nomor = preg_replace('/[^0-9]/', '', $nomor); // hapus non-digit
+
+        if (substr($nomor, 0, 1) === '0') {
+            $nomor = '62' . substr($nomor, 1); // 081 → 6281
+        } elseif (substr($nomor, 0, 2) !== '62') {
+            $nomor = '62' . $nomor; // 81 → 6281
+        }
+
+        if (!preg_match('/^62[0-9]{9,13}$/', $nomor)) {
+            return ['success' => false, 'message' => 'Nomor tidak valid. Gunakan format Indonesia (contoh: 081234567890 atau 81234567890)'];
+        }
+
+        $success = $this->model->updateProfil($userId, $this->session->get('nama'), $nomor);
+
+        if ($success) {
+            // Hapus flag require_contact
+            $this->session->set('require_contact', false);
+            return ['success' => true, 'message' => 'Nomor telepon berhasil disimpan'];
+        }
+
+        return ['success' => false, 'message' => 'Gagal menyimpan nomor'];
     }
 }

@@ -1,6 +1,7 @@
-<!-- views/register.php -->
+<!-- app/Views/auth/register.php -->
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,13 +16,30 @@
             padding: 2rem;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        .required { color: #dc3545; }
-        .text-muted { font-size: 0.9em; }
-        .email-hint { font-size: 0.85em; color: #6c757d; margin-top: 0.25rem; }
+
+        .required {
+            color: #dc3545;
+        }
+
+        .text-muted {
+            font-size: 0.9em;
+        }
+
+        .email-hint {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        .optional {
+            color: #6c757d;
+            font-size: 0.85em;
+        }
     </style>
 </head>
+
 <body class="bg-light">
     <div class="container">
         <div class="form-section">
@@ -40,7 +58,7 @@
             <form method="POST" action="../index.php?action=register" id="registerForm">
                 <!-- Role -->
                 <div class="mb-3">
-                    <label class="form-label">Pilih Role <span class="required">*</span></label>
+                    <label class="form-label">Pilih Role <span class=" required">*</span></label>
                     <select class="form-select" name="role" id="role" required onchange="updateEmailHint(); toggleNimField();">
                         <option value="">-- Pilih Role --</option>
                         <option value="civitas">Civitas (Mahasiswa/Dosen)</option>
@@ -70,10 +88,19 @@
                     <input type="text" class="form-control" name="nama" required>
                 </div>
 
-                <!-- Nomor Kontak -->
+                <!-- Nomor Kontak - SEKARANG TIDAK WAJIB -->
                 <div class="mb-3">
-                    <label class="form-label">Nomor Kontak <span class="required">*</span></label>
-                    <input type="text" class="form-control" name="nomor_kontak" placeholder="081234567890" required>
+                    <label class="form-label">Nomor Kontak (WhatsApp)
+                        <span class="optional">(Opsional - bisa diisi nanti)</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">+62</span>
+                        <input type="text" class="form-control" name="nomor_kontak"
+                            placeholder="81234567890" inputmode="numeric">
+                    </div>
+                    <small class="text-muted">
+                        Bisa dikosongkan. Jika kosong, akan diminta setelah login pertama
+                    </small>
                 </div>
 
                 <!-- NIM/NIP (Hanya Civitas) -->
@@ -122,7 +149,14 @@
             }
         }
 
-        // Jalankan saat halaman dimuat
+        // Auto-format nomor kontak (opsional)
+        document.querySelector('input[name="nomor_kontak"]').addEventListener('input', function(e) {
+            let val = e.target.value.replace(/\D/g, '');
+            if (val.startsWith('0')) val = val.substring(1);
+            if (val && !val.startsWith('62')) val = val; // biarkan user isi mulai 8
+            e.target.value = val;
+        });
+
         window.onload = function() {
             updateEmailHint();
             toggleNimField();
@@ -130,4 +164,5 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

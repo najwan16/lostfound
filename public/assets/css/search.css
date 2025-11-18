@@ -1,57 +1,159 @@
-/* css/search.css */
+/* ————————————————
+   GLOBAL
+——————————————— */
 body {
     background: #f8f9fa;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-.card {
-    border: none;
+/* ————————————————
+   FILTER BLOCK
+——————————————— */
+.filter-block {
+    background: white;
     border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-}
-
-.header {
-    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-    color: white;
     padding: 1.5rem;
-    border-radius: 16px 16px 0 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.btn-filter {
+    display: block;
+    width: 100%;
+    padding: 0.9rem;
+    margin-bottom: 0.75rem;
     text-align: center;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    border: 2px solid #e0e0e0;
+    color: #555;
+    transition: all 0.3s;
 }
 
-.filter-btn {
-    margin: 0.5rem;
+.btn-filter-active,
+.btn-filter:hover {
+    background: #ff6b35;
+    color: white;
+    border-color: #ff6b35;
 }
 
-.table th {
-    background-color: #e3f2fd;
+.btn-search {
+    background: #E57229 !important;
+    color: white !important;
+    padding: 0.9rem;
+    border-radius: 12px;
+    border: none;
     font-weight: 600;
 }
 
-.badge-tipe {
-    font-size: 0.8rem;
+.btn-search:hover {
+    background: #d65f1a !important;
 }
 
-.pembuat {
-    font-size: 0.9rem;
-    color: #555;
+/* ————————————————
+   ITEM CARD — FIX HEIGHT
+——————————————— */
+.item-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+
+    /* fix height */
+    height: 300px;
+    display: flex;
+    flex-direction: column;
 }
 
-.nim {
-    font-weight: bold;
-    color: #1e40af;
+.item-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
 }
 
-.status-hilang {
-    background-color: #fff3cd;
-    color: #856404;
+.item-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
 }
 
-.status-ditemukan {
-    background-color: #d1edff;
-    color: #0c5460;
+.item-image img,
+.hidden-image-box {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.search-form .form-control,
-.search-form .form-select {
+.item-info {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Title dibuat 2 baris saja */
+.item-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #222;
+
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+}
+
+/* META fix height */
+.item-meta {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #262832;
+    font-size: 0.85rem;
+}
+
+.material-symbols-outlined {
+    font-size: 20px;
+    color: #262832;
+    line-height: 1;
+}
+
+/* ————————————————
+   RESPONSIVE
+——————————————— */
+@media (max-width: 768px) {
+    .item-card {
+        height: 330px;
+    }
+
+    .item-image {
+        height: 170px;
+    }
+}
+
+.card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.hidden-image-box {
+    height: 220px;
+    background: #f0f0f0;
     border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-weight: 600;
+}
+
+.hidden-image-box .material-symbols-outlined {
+    font-size: 48px;
+    color: #555;
 }

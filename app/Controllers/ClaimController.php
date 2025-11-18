@@ -22,26 +22,36 @@ class ClaimController
             $this->redirect('home');
         }
 
-        $idLaporan = (int)($_GET['id'] ?? 0);
-        if ($idLaporan <= 0) {
+        $id_laporan = (int)($_GET['id'] ?? 0);  // ubah nama variabel jadi konsisten
+        if ($id_laporan <= 0) {
             $this->redirect('laporan');
         }
 
-        $laporan = $this->model->getLaporan($idLaporan);
+        // Ambil data laporan
+        $laporan = $this->model->getLaporan($id_laporan);
         if (!$laporan || $laporan['status'] !== 'sudah_diambil') {
             $this->redirect('laporan');
         }
 
         $userId = $this->session->get('userId');
+
+        // Cek bukan punya sendiri
         if ($laporan['id_akun'] == $userId) {
-            $this->redirect('laporan-detail', ['id' => $idLaporan, 'error' => 'Tidak bisa claim laporan sendiri']);
+            $this->redirect('laporan-detail', ['id' => $id_laporan, 'error' => 'Tidak bisa claim laporan sendiri']);
         }
 
-        if ($this->model->hasClaim($idLaporan, $userId)) {
-            $this->redirect('laporan-detail', ['id' => $idLaporan, 'error' => 'Anda sudah mengajukan claim']);
+        // Cek sudah claim belum
+        if ($this->model->hasClaim($id_laporan, $userId)) {
+            $this->redirect('laporan-detail', ['id' => $id_laporan, 'error' => 'Anda sudah mengajukan claim']);
         }
 
-        $this->model->getUser($userId);
+        // Ambil data user
+        $user = $this->model->getUser($userId);
+        if (!$user) {
+            die('Data pengguna tidak ditemukan.');
+        }
+
+        // KIRIM SEMUA VARIABEL YANG DIBUTUHKAN VIEW!
         require 'app/Views/civitas/claim_form.php';
     }
 

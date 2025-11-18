@@ -96,16 +96,29 @@ switch ($action) {
     // ==================================================================
     //  AUTH: LOGIN
     // ==================================================================
+    // ==================================================================
+    //  AUTHENTICATION: LOGIN
+    // ==================================================================
     case 'login':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email    = trim($_POST['email'] ?? '');
-            $password = $_POST['password'] ?? '';
-            $remember = isset($_POST['remember']);
+            $email     = trim($_POST['email'] ?? '');
+            $password  = $_POST['password'] ?? '';
+            $remember  = isset($_POST['remember']);
 
             $result = $authController->login($email, $password);
 
             if ($result['success']) {
+                // Set cookie remember me
                 $authController->setRememberMeCookie($email, $sessionManager->get('userId'), $remember);
+
+                // === CEK APAKAH PERLU ISI NOMOR KONTAK ===
+                if ($result['require_contact'] ?? false) {
+                    $sessionManager->set('require_contact', true); // Pastikan flag aktif
+                    header('Location: index.php?action=kontak');
+                    exit;
+                }
+
+                // Jika sudah punya nomor → langsung ke halaman sesuai role
                 $redirect = ($result['role'] === 'civitas') ? 'home' : 'dashboard';
                 header("Location: index.php?action=$redirect");
                 exit;
@@ -114,43 +127,82 @@ switch ($action) {
                 $success = false;
             }
         }
+        // Tampilkan halaman login
         require_once 'app/Views/auth/login.php';
         break;
 
     // ==================================================================
-    //  AUTH: REGISTER
+    //  HALAMAN: LENGKAPI NOMOR KONTAK (WAJIB SETELAH LOGIN PERTAMA)
+    // ==================================================================
+    case 'kontak':
+        // Proteksi: hanya user yang login & belum punya nomor yang boleh akses
+        if (!$sessionManager->get('userId') || !$sessionManager->get('require_contact')) {
+            $role = $sessionManager->get('role') ?? 'civitas';
+            $redirect = $role === 'satpam' ? 'dashboard' : 'home';
+            header("Location: index.php?action=$redirect");
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nomor = trim($_POST['nomor_kontak'] ?? '');
+
+            $updateResult = $authController->updateKontak($nomor);
+
+            if ($updateResult['success']) {
+                // Hapus flag & arahkan ke halaman utama
+                $sessionManager->set('require_contact', false);
+                $role = $sessionManager->get('role');
+                $redirect = $role === 'civitas' ? 'home' : 'dashboard';
+                header("Location: index.php?action=$redirect");
+                exit;
+            } else {
+                $message = $updateResult['message'];
+                $success = false;
+            }
+        }
+
+        // Tampilkan form kontak
+        $page_title = 'Lengkapi Nomor Telepon';
+        require_once 'app/Views/auth/kontak.php';
+        break;
+
+    // ==================================================================
+    //  AUTH: REGISTER (NOMOR KONTAK SEKARANG OPSIONAL)
     // ==================================================================
     case 'register':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email        = trim($_POST['email'] ?? '');
             $password     = $_POST['password'] ?? '';
             $nama         = trim($_POST['nama'] ?? '');
-            $nomor_kontak = trim($_POST['nomor_kontak'] ?? '');
+            $nomor_kontak = trim($_POST['nomor_kontak'] ?? ''); // BOLEH KOSONG
             $role         = $_POST['role'] ?? '';
             $nomor_induk  = trim($_POST['nomor_induk'] ?? '');
 
-            if (empty($email) || empty($password) || empty($nama) || empty($nomor_kontak) || empty($role)) {
+            // VALIDASI WAJIB (nomor_kontak dihapus dari sini)
+            if (empty($email) || empty($password) || empty($nama) || empty($role)) {
                 $success = false;
-                $message = 'Semua field wajib diisi';
+                $message = 'Email, password, nama, dan role wajib diisi';
                 require_once 'app/Views/auth/register.php';
                 break;
             }
 
+            // Validasi email civitas
             if ($role === 'civitas') {
                 if (!preg_match('/@(student\.)?ub\.ac\.id$/i', $email)) {
                     $success = false;
-                    $message = 'Civitas harus menggunakan email UB';
+                    $message = 'Civitas harus menggunakan email UB (@ub.ac.id atau @student.ub.ac.id)';
                     require_once 'app/Views/auth/register.php';
                     break;
                 }
                 if (empty($nomor_induk)) {
                     $success = false;
-                    $message = 'NIM/NIP wajib diisi';
+                    $message = 'NIM/NIP wajib diisi untuk Civitas';
                     require_once 'app/Views/auth/register.php';
                     break;
                 }
             }
 
+            // Validasi email satpam (harus valid email)
             if ($role === 'satpam' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $success = false;
                 $message = 'Format email tidak valid';
@@ -158,6 +210,7 @@ switch ($action) {
                 break;
             }
 
+            // Cek email sudah terdaftar?
             $stmt = getDB()->prepare("SELECT id_akun FROM akun WHERE email = ?");
             $stmt->execute([$email]);
             if ($stmt->fetch()) {
@@ -167,10 +220,34 @@ switch ($action) {
                 break;
             }
 
+            // Normalisasi nomor kontak jika diisi
+            if (!empty($nomor_kontak)) {
+                $nomor_kontak = preg_replace('/[^0-9]/', '', $nomor_kontak);
+                if (substr($nomor_kontak, 0, 1) === '0') {
+                    $nomor_kontak = '62' . substr($nomor_kontak, 1);
+                } elseif (substr($nomor_kontak, 0, 2) !== '62') {
+                    $nomor_kontak = '62' . $nomor_kontak;
+                }
+                // Validasi format Indonesia
+                if (!preg_match('/^62[1-9][0-9]{8,12}$/', $nomor_kontak)) {
+                    $success = false;
+                    $message = 'Format nomor tidak valid (contoh benar: 81234567890)';
+                    require_once 'app/Views/auth/register.php';
+                    break;
+                }
+            } else {
+                $nomor_kontak = null; // Simpan NULL di DB
+            }
+
+            // Simpan ke database
             $hashed = password_hash($password, PASSWORD_DEFAULT);
             try {
                 getDB()->beginTransaction();
-                $stmt = getDB()->prepare("INSERT INTO akun (email, password, nama, nomor_kontak, role) VALUES (?, ?, ?, ?, ?)");
+
+                $stmt = getDB()->prepare("
+                    INSERT INTO akun (email, password, nama, nomor_kontak, role) 
+                    VALUES (?, ?, ?, ?, ?)
+                ");
                 $stmt->execute([$email, $hashed, $nama, $nomor_kontak, $role]);
                 $id_akun = getDB()->lastInsertId();
 
@@ -183,6 +260,8 @@ switch ($action) {
                 }
 
                 getDB()->commit();
+
+                // Jika nomor kontak kosong → nanti dipaksa isi setelah login
                 header('Location: index.php?action=login&msg=register_success');
                 exit;
             } catch (Exception $e) {
@@ -193,6 +272,8 @@ switch ($action) {
             }
             break;
         }
+
+        // Tampilkan form registrasi
         require_once 'app/Views/auth/register.php';
         break;
 

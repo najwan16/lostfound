@@ -1,11 +1,16 @@
-/* public/css/claim.css */
-* {
-    margin: 0;
-    padding: 0;
+/* public/assets/css/claim-form.css */
+/* === SCOPING PAGE KLAIM SAJA === */
+.claim-page * {
     box-sizing: border-box;
 }
 
-body {
+/* Jangan reset global! Hanya reset di dalam .claim-page */
+.claim-page {
+    margin: 0;
+    padding: 0;
+}
+
+.claim-page body {
     background: #f8f9fa;
     font-family: "Plus Jakarta Sans", sans-serif;
     color: #333;
@@ -13,18 +18,22 @@ body {
     min-height: 100vh;
 }
 
-/* ===== CONTAINER UTAMA ===== */
-.container {
+/* Container utama hanya berlaku di halaman klaim */
+.claim-page .claim-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem 1rem;
     display: flex;
     gap: 2rem;
-    align-items: flex-start;
+    flex-wrap: wrap;
+
+    justify-content: space-between;
+    /* Balances left, center, right */
+
 }
 
 /* ===== PREVIEW BARANG (KIRI) ===== */
-.item-preview-card {
+.claim-page .item-preview-card {
     background: white;
     border-radius: 16px;
     padding: 1.5rem;
@@ -33,7 +42,7 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.preview-image {
+.claim-page .preview-image {
     width: 100%;
     height: 200px;
     object-fit: cover;
@@ -41,13 +50,13 @@ body {
     margin-bottom: 1rem;
 }
 
-.preview-title {
+.claim-page .preview-title {
     font: 700 1.25rem/1.2 "Plus Jakarta Sans", sans-serif;
     color: #1e293b;
     margin-bottom: 0.75rem;
 }
 
-.preview-meta {
+.claim-page .preview-meta {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -55,51 +64,30 @@ body {
     font-size: 0.9rem;
 }
 
-.preview-meta-item {
+.claim-page .preview-meta-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.material-symbols-outlined {
+.claim-page .material-symbols-outlined {
     font-size: 1.1rem;
     font-variation-settings: "FILL" 0, "wght" 300;
 }
 
-/* ===== FORM KLAIM (KANAN) - FULL WIDTH ===== */
-.form-section {
+/* ===== FORM KLAIM (KANAN) ===== */
+.claim-page .form-section {
     background: white;
     border-radius: 16px;
     padding: 2rem;
     flex: 1;
-    width: 100% !important;
-    max-width: none !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* ===== FORM GROUP & INPUT ===== */
-.form-group {
-    margin-bottom: 1.5rem;
-    width: 100%;
-}
-
-.form-label {
-    display: block;
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
-}
-
-.required {
-    color: #ef4444;
-}
-
-/* INPUT & TEXTAREA - FULL WIDTH */
-.form-input,
-.form-textarea {
+/* Input & textarea */
+.claim-page .form-input,
+.claim-page .form-textarea {
     width: 100% !important;
-    max-width: 100% !important;
     padding: 0.75rem 1rem;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
@@ -109,26 +97,26 @@ body {
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.form-input:disabled {
+.claim-page .form-input:disabled {
     background: #f1f5f9;
     color: #94a3b8;
     cursor: not-allowed;
 }
 
-.form-input:focus,
-.form-textarea:focus {
+.claim-page .form-input:focus,
+.claim-page .form-textarea:focus {
     outline: none;
     border-color: #f97316;
     box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
-.form-textarea {
+.claim-page .form-textarea {
     min-height: 120px;
     resize: vertical;
 }
 
-/* ===== UPLOAD AREA - FULL WIDTH ===== */
-.upload-area {
+/* Upload area */
+.claim-page .upload-area {
     width: 100% !important;
     border: 2px dashed #cbd5e1;
     border-radius: 12px;
@@ -139,38 +127,33 @@ body {
     transition: all 0.2s;
 }
 
-.upload-area:hover {
+.claim-page .upload-area:hover {
     border-color: #f97316;
     background: #fff7ed;
 }
 
-.upload-icon {
+.claim-page .upload-icon {
     width: 80px;
     height: 80px;
     margin: 0 auto 1rem;
     opacity: 0.3;
 }
 
-.upload-text {
-    color: #64748b;
-    margin-bottom: 0.5rem;
-}
-
-.upload-text strong {
+.claim-page .upload-text strong {
     color: #1e293b;
 }
 
-.upload-hint {
+.claim-page .upload-hint {
     color: #f97316;
     font-size: 0.9rem;
 }
 
-.file-input {
+.claim-page .file-input {
     display: none;
 }
 
-/* ===== TOMBOL SUBMIT ===== */
-.submit-btn {
+/* Submit button */
+.claim-page .submit-btn {
     background: #f97316;
     color: white;
     border: none;
@@ -184,43 +167,43 @@ body {
     transition: background 0.2s;
 }
 
-.submit-btn:hover {
+.claim-page .submit-btn:hover {
     background: #ea580c;
 }
 
-/* ===== RESPONSIVE ===== */
+.claim-page .required {
+    color: #ef4444;
+}
+
+/* Responsive */
 @media (max-width: 992px) {
-    .container {
+    .claim-page .claim-container {
         flex-direction: column;
         padding: 1.5rem 1rem;
         gap: 1.5rem;
     }
 
-    .item-preview-card {
+    .claim-page .item-preview-card {
         width: 100%;
         max-width: 400px;
         margin: 0 auto;
     }
-
-    .form-section {
-        padding: 1.5rem;
-    }
 }
 
 @media (max-width: 576px) {
-    .container {
+    .claim-page .claim-container {
         padding: 1rem 0.5rem;
     }
 
-    .form-section {
+    .claim-page .form-section {
         padding: 1.25rem;
     }
 
-    .upload-area {
+    .claim-page .upload-area {
         padding: 2rem 1rem;
     }
 
-    .preview-image {
+    .claim-page .preview-image {
         height: 180px;
     }
 }
