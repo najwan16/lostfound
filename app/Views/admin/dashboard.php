@@ -1,243 +1,293 @@
-<!-- views/admin/dashboard_satpam.php -->
 <?php
-// ANTI-CACHE
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+// app/Views/satpam/dashboard.php
+
+header("Cache-Control: no-store, no-cache, must-revalidate,max-age=0");
 header("Pragma: no-cache");
 header("Expires: 0");
 
 require_once dirname(__DIR__, 2) . '../../config/db.php';
-require_once dirname(__DIR__, 2) . '/controllers/AuthController.php';
+require_once dirname(__DIR__, 2) . '../../app/Controllers/AuthController.php';
 
 $auth = new AuthController();
 $sessionManager = $auth->getSessionManager();
 
 if ($sessionManager->get('role') !== 'satpam') {
-    header('Location: ' . dirname(__DIR__, 2) . '/index.php?action=home');
+    header('Location: index.php?action=login');
     exit;
 }
 
 $pdo = getDB();
 
-// === FILTER ===
+// FILTER & PAGINATION
 $filter_hilang = $_GET['filter_hilang'] ?? 'semua';
 $filter_ditemukan = $_GET['filter_ditemukan'] ?? 'semua';
 
-// === AMBIL DATA HILANG ===
-$where_hilang = "WHERE l.tipe_laporan = 'hilang'";
+$perPage = (int)($_GET['show'] ?? 10);
+if ($perPage <= 0) $perPage = 10;
+
+$page_hilang = max(1, (int)($_GET['page_hilang'] ?? 1));
+$page_ditemukan = max(1, (int)($_GET['page_ditemukan'] ?? 1));
+
+$offset_hilang = ($page_hilang - 1) * $perPage;     // <-- DIPERBAIKI: HAPUS MINUS GANDA
+$offset_ditemukan = ($page_ditemukan - 1) * $perPage;
+
+// DATA BARANG HILANG
+$where = "WHERE l.tipe_laporan = 'hilang'";
+$params = [];
 if ($filter_hilang !== 'semua') {
-    $where_hilang .= " AND l.status = ?";
+    $where .= " AND l.status = ?";
+    $params[] = $filter_hilang;
 }
-$stmt_hilang = $pdo->prepare("
-    SELECT l.id_laporan, l.nama_barang, l.deskripsi_fisik, l.kategori, 
-           l.lokasi, l.waktu, l.status, l.created_at,
-           a.nama AS nama_pembuat, a.nomor_kontak, c.nomor_induk
-    FROM laporan l
-    JOIN akun a ON l.id_akun = a.id_akun
-    LEFT JOIN civitas c ON a.id_akun = c.id_akun
-    $where_hilang
-    ORDER BY l.created_at DESC
-");
-$stmt_hilang->execute($filter_hilang !== 'semua' ? [$filter_hilang] : []);
-$laporan_hilang = $stmt_hilang->fetchAll();
+$sql = "SELECT SQL_CALC_FOUND_ROWS l.id_laporan, l.nama_barang, l.kategori, l.lokasi, l.waktu, l.status,
+        a.nama AS nama_pembuat, c.nomor_induk
+        FROM laporan l
+        JOIN akun a ON l.id_akun = a.id_akun
+        LEFT JOIN civitas c ON a.id_akun = c.id_akun
+        $where
+        ORDER BY l.created_at DESC
+        LIMIT $offset_hilang, $perPage";
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$laporan_hilang = $stmt->fetchAll();
 
-// === AMBIL DATA DITEMUKAN ===
-$where_ditemukan = "WHERE l.tipe_laporan = 'ditemukan'";
+$total_hilang = $pdo->query("SELECT FOUND_ROWS()")->fetchColumn();
+$totalPages_hilang = ceil($total_hilang / $perPage);
+
+// DATA BARANG DITEMUKAN
+$where = "WHERE l.tipe_laporan = 'ditemukan'";
+$params = [];
 if ($filter_ditemukan !== 'semua') {
-    $where_ditemukan .= " AND l.status = ?";
+    $where .= " AND l.status = ?";
+    $params[] = $filter_ditemukan;
 }
-$stmt_ditemukan = $pdo->prepare("
-    SELECT l.id_laporan, l.nama_barang, l.deskripsi_fisik, l.kategori, 
-           l.lokasi, l.waktu, l.status, l.created_at,
-           a.nama AS nama_pembuat, a.nomor_kontak, c.nomor_induk
-    FROM laporan l
-    JOIN akun a ON l.id_akun = a.id_akun
-    LEFT JOIN civitas c ON a.id_akun = c.id_akun
-    $where_ditemukan
-    ORDER BY l.created_at DESC
-");
-$stmt_ditemukan->execute($filter_ditemukan !== 'semua' ? [$filter_ditemukan] : []);
-$laporan_ditemukan = $stmt_ditemukan->fetchAll();
+$sql = "SELECT SQL_CALC_FOUND_ROWS l.id_laporan, l.nama_barang, l.kategori, l.lokasi, l.waktu, l.status,
+        a.nama AS nama_pembuat, c.nomor_induk
+        FROM laporan l
+        JOIN akun a ON l.id_akun = a.id_akun
+        LEFT JOIN civitas c ON a.id_akun = c.id_akun
+        $where
+        ORDER BY l.created_at DESC
+        LIMIT $offset_ditemukan, $perPage";
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$laporan_ditemukan = $stmt->fetchAll();
 
-$current_page = 'dashboard';
-$page_title = 'Dashboard Satpam';
+$total_ditemukan = $pdo->query("SELECT FOUND_ROWS()")->fetchColumn();
+$totalPages_ditemukan = ceil($total_ditemukan / $perPage);
+
+$GLOBALS['current_page'] = 'dashboard';
+$title = 'Dashboard Satpam - Lost & Found FILKOM';
+include 'app/Views/layouts/sidebar.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="id">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $page_title ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-        <link href="public/assets/css/admin.css" rel="stylesheet">
+<link rel="stylesheet" href="/public/assets/css/dashboard.css">
 
-</head>
+<div class="dashboard-container">
 
-<body>
-
-    <!-- SIDEBAR -->
-    <?php include realpath(dirname(__DIR__) . '/layouts/sidebar.php'); ?>
-
-
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
-        <div class="container-fluid p-4">
-
-            <!-- TOMBOL LAPOR -->
-            <div class="mb-4">
-                <a href="../../index.php?action=laporanSatpam-form" class="btn-lapor-ditemukan d-block text-center text-decoration-none">
-                    <div class="icon-plus">
-                        <span class="material-symbols-outlined">add</span>
-                    </div>
-                    <span class="text-lapor">Buat Laporan Penemuan</span>
-                </a>
+    <!-- TOMBOL BUAT LAPORAN -->
+    <div class="lapor-button-section">
+        <a href="index.php?action=laporanSatpam-form" class="btn-lapor-solid">
+            <div class="lapor-icon-box">
+                <span class="material-symbols-outlined">add</span>
             </div>
-
-            <!-- TABEL: BARANG HILANG -->
-            <div class="card shadow-sm border-0 mb-5">
-                <div class="card-header bg-gradient-warning text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Barang Hilang</h5>
-                    <div class="filter-group">
-                        <a href="?action=dashboard&filter_hilang=semua" class="btn btn-sm <?= $filter_hilang === 'semua' ? 'btn-light' : 'btn-outline-light' ?>">Semua</a>
-                        <a href="?action=dashboard&filter_hilang=belum_ditemukan" class="btn btn-sm <?= $filter_hilang === 'belum_ditemukan' ? 'btn-light' : 'btn-outline-light' ?>">Belum Ditemukan</a>
-                        <a href="?action=dashboard&filter_hilang=sudah_diambil" class="btn btn-sm <?= $filter_hilang === 'sudah_diambil' ? 'btn-light' : 'btn-outline-light' ?>">Sudah Diambil</a>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <?php if (empty($laporan_hilang)): ?>
-                        <div class="alert alert-info text-center">
-                            Tidak ada laporan barang hilang.
-                        </div>
-                    <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Barang</th>
-                                        <th>Deskripsi</th>
-                                        <th>Kategori</th>
-                                        <th>Lokasi</th>
-                                        <th>Waktu</th>
-                                        <th>Status</th>
-                                        <th>Dibuat</th>
-                                        <th>Pembuat</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($laporan_hilang as $i => $l): ?>
-                                        <tr class="clickable-row" data-href="../../index.php?action=laporanSatpam-detail&id=<?= $l['id_laporan'] ?>">
-                                            <td><?= $i + 1 ?></td>
-                                            <td><strong><?= htmlspecialchars($l['nama_barang']) ?></strong></td>
-                                            <td class="text-truncate" style="max-width:150px;"><?= htmlspecialchars($l['deskripsi_fisik'] ?: '-') ?></td>
-                                            <td><span class="badge bg-primary"><?= ucfirst($l['kategori']) ?></span></td>
-                                            <td><?= htmlspecialchars($l['lokasi']) ?></td>
-                                            <td><small><?= date('d M Y H:i', strtotime($l['waktu'])) ?></small></td>
-                                            <td>
-                                                <span class="badge <?= $l['status'] === 'belum_ditemukan' ? 'bg-warning text-dark' : 'bg-success' ?>">
-                                                    <?= ucfirst(str_replace('_', ' ', $l['status'])) ?>
-                                                </span>
-                                            </td>
-                                            <td><?= date('d M Y', strtotime($l['created_at'])) ?></td>
-                                            <td>
-                                                <div class="pembuat">
-                                                    <strong><?= htmlspecialchars($l['nama_pembuat']) ?></strong><br>
-                                                    <small class="text-muted"><?= htmlspecialchars($l['nomor_kontak']) ?></small>
-                                                    <?php if ($l['nomor_induk']): ?>
-                                                        <div class="nim">NIM: <?= htmlspecialchars($l['nomor_induk']) ?></div>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </td>
-                                            
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php endif; ?>
-                </div>
+            <div class="lapor-title">Buat Laporan Penemuan</div>
+        </a>
+    </div>
+    <br>
+    <!-- BARANG HILANG -->
+    <div class="section-card mb-5">
+        <div class="section-header bg-warning">
+            <h5 class="section-title">Barang Hilang</h5>
+            <div class="filter-buttons">
+                <a href="index.php?action=dashboard&filter_hilang=semua" class="filter-btn <?= $filter_hilang === 'semua' ? 'active' : '' ?>">Semua</a>
+                <a href="index.php?action=dashboard&filter_hilang=belum_ditemukan" class="filter-btn <?= $filter_hilang === 'belum_ditemukan' ? 'active' : '' ?>">Belum Ditemukan</a>
+                <a href="index.php?action=dashboard&filter_hilang=sudah_diambil" class="filter-btn <?= $filter_hilang === 'sudah_diambil' ? 'active' : '' ?>">Sudah Diambil</a>
             </div>
+        </div>
+        <div class="section-body">
+            <?php if (empty($laporan_hilang)): ?>
+                <p class="text-center text-muted py-5">Tidak ada laporan barang hilang.</p>
+            <?php else: ?>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Barang</th>
+                                <th>Kategori</th>
+                                <th>Lokasi</th>
+                                <th>Waktu</th>
+                                <th>Status</th>
+                                <th>Pembuat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($laporan_hilang as $i => $l): ?>
+                                <tr class="table-row" data-href="index.php?action=laporanSatpam-detail&id=<?= $l['id_laporan'] ?>">
+                                    <td><?= ($page_hilang - 1) * $perPage + $i + 1 ?></td>
+                                    <td><strong><?= htmlspecialchars($l['nama_barang']) ?></strong></td>
+                                    <td><span class="badge-cat"><?= ucfirst($l['kategori']) ?></span></td>
+                                    <td><?= htmlspecialchars($l['lokasi']) ?></td>
+                                    <td class="small-text"><?= date('d M Y H:i', strtotime($l['waktu'])) ?></td>
+                                    <td>
+                                        <span class="status-badge <?= $l['status'] === 'belum_ditemukan' ? 'status-missing' : 'status-claimed' ?>">
+                                            <?= $l['status'] === 'belum_ditemukan' ? 'Belum Ditemukan' : 'Sudah Diambil' ?>
+                                        </span>
+                                    </td>
+                                    <td class="pembuat-info">
+                                        <strong><?= htmlspecialchars($l['nama_pembuat']) ?></strong>
+                                        <?php if ($l['nomor_induk']): ?>
+                                            <div class="nim-text">NIM: <?= htmlspecialchars($l['nomor_induk']) ?></div>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
 
-            <!-- TABEL: BARANG DITEMUKAN -->
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-gradient-success text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Barang Ditemukan</h5>
-                    <div class="filter-group">
-                        <a href="?action=dashboard&filter_ditemukan=semua" class="btn btn-sm <?= $filter_ditemukan === 'semua' ? 'btn-light' : 'btn-outline-light' ?>">Semua</a>
-                        <a href="?action=dashboard&filter_ditemukan=menunggu_klaim" class="btn btn-sm <?= $filter_ditemukan === 'menunggu_klaim' ? 'btn-light' : 'btn-outline-light' ?>">Menunggu Klaim</a>
-                        <a href="?action=dashboard&filter_ditemukan=sudah_diambil" class="btn btn-sm <?= $filter_ditemukan === 'sudah_diambil' ? 'btn-light' : 'btn-outline-light' ?>">Sudah Diambil</a>
+                <!-- PAGINATION PERSIS GAMBAR -->
+                <div class="table-footer">
+                    <div class="show-entries">
+                        <label>Show</label>
+                        <select onchange="window.location='index.php?action=dashboard&show='+this.value+'&filter_hilang=<?= $filter_hilang ?>&filter_ditemukan=<?= $filter_ditemukan ?>'">
+                            <option value="10" <?= $perPage == 10 ? 'selected' : '' ?>>10</option>
+                            <option value="25" <?= $perPage == 25 ? 'selected' : '' ?>>25</option>
+                            <option value="50" <?= $perPage == 50 ? 'selected' : '' ?>>50</option>
+                            <option value="100" <?= $perPage == 100 ? 'selected' : '' ?>>100</option>
+                        </select>
+                        <span>entries</span>
+                    </div>
+
+                    <div class="pagination">
+                        <?php if ($page_hilang > 1): ?>
+                            <a href="index.php?action=dashboard&filter_hilang=<?= $filter_hilang ?>&page_hilang=<?= $page_hilang - 1 ?>&show=<?= $perPage ?>" class="pagination-arrow">«</a>
+                        <?php endif; ?>
+
+                        <?php
+                        $startPage = max(1, $page_hilang - 2);
+                        $endPage = min($totalPages_hilang, $page_hilang + 2);
+                        for ($p = $startPage; $p <= $endPage; $p++): ?>
+                            <?php if ($p == $page_hilang): ?>
+                                <span class="pagination-number active"><?= $p ?></span>
+                            <?php else: ?>
+                                <a href="index.php?action=dashboard&filter_hilang=<?= $filter_hilang ?>&page_hilang=<?= $p ?>&show=<?= $perPage ?>" class="pagination-number"><?= $p ?></a>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+
+                        <?php if ($page_hilang < $totalPages_hilang): ?>
+                            <a href="index.php?action=dashboard&filter_hilang=<?= $filter_hilang ?>&page_hilang=<?= $page_hilang + 1 ?>&show=<?= $perPage ?>" class="pagination-arrow">»</a>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <div class="card-body">
-                    <?php if (empty($laporan_ditemukan)): ?>
-                        <div class="alert alert-info text-center">
-                            Tidak ada laporan barang ditemukan.
-                        </div>
-                    <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Barang</th>
-                                        <th>Deskripsi</th>
-                                        <th>Kategori</th>
-                                        <th>Lokasi</th>
-                                        <th>Waktu</th>
-                                        <th>Status</th>
-                                        <th>Dibuat</th>
-                                        <th>Pembuat</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($laporan_ditemukan as $i => $l): ?>
-                                        <tr class="clickable-row" data-href="../../index.php?action=laporanSatpam-detail&id=<?= $l['id_laporan'] ?>">
-                                            <td><?= $i + 1 ?></td>
-                                            <td><strong><?= htmlspecialchars($l['nama_barang']) ?></strong></td>
-                                            <td class="text-truncate" style="max-width:150px;"><?= htmlspecialchars($l['deskripsi_fisik'] ?: '-') ?></td>
-                                            <td><span class="badge bg-primary"><?= ucfirst($l['kategori']) ?></span></td>
-                                            <td><?= htmlspecialchars($l['lokasi']) ?></td>
-                                            <td><small><?= date('d M Y H:i', strtotime($l['waktu'])) ?></small></td>
-                                            <td>
-                                                <span class="badge <?= $l['status'] === 'menunggu_klaim' ? 'bg-warning text-dark' : 'bg-success' ?>">
-                                                    <?= ucfirst(str_replace('_', ' ', $l['status'])) ?>
-                                                </span>
-                                            </td>
-                                            <td><?= date('d M Y', strtotime($l['created_at'])) ?></td>
-                                            <td>
-                                                <div class="pembuat">
-                                                    <strong><?= htmlspecialchars($l['nama_pembuat']) ?></strong><br>
-                                                    <small class="text-muted"><?= htmlspecialchars($l['nomor_kontak']) ?></small>
-                                                    <?php if ($l['nomor_induk']): ?>
-                                                        <div class="nim">NIM: <?= htmlspecialchars($l['nomor_induk']) ?></div>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
+            <?php endif; ?>
         </div>
     </div>
 
-    <script>
-        document.querySelectorAll('.clickable-row').forEach(row => {
-            row.addEventListener('click', () => {
-                window.location = row.dataset.href;
-            });
+    <!-- BARANG DITEMUKAN (SAMA DENGAN HILANG + PAGINATION SENDIRI) -->
+    <div class="section-card">
+        <div class="section-header bg-success">
+            <h5 class="section-title">Barang Ditemukan</h5>
+            <div class="filter-buttons">
+                <a href="index.php?action=dashboard&filter_ditemukan=semua" class="filter-btn <?= $filter_ditemukan === 'semua' ? 'active' : '' ?>">Semua</a>
+                <a href="index.php?action=dashboard&filter_ditemukan=menunggu_klaim" class="filter-btn <?= $filter_ditemukan === 'menunggu_klaim' ? 'active' : '' ?>">Menunggu Klaim</a>
+                <a href="index.php?action=dashboard&filter_ditemukan=sudah_diambil" class="filter-btn <?= $filter_ditemukan === 'sudah_diambil' ? 'active' : '' ?>">Sudah Diambil</a>
+            </div>
+        </div>
+        <div class="section-body">
+            <?php if (empty($laporan_ditemukan)): ?>
+                <p class="text-center text-muted py-5">Tidak ada laporan barang ditemukan.</p>
+            <?php else: ?>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Barang</th>
+                                <th>Kategori</th>
+                                <th>Lokasi</th>
+                                <th>Waktu</th>
+                                <th>Status</th>
+                                <th>Pembuat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($laporan_ditemukan as $i => $l): ?>
+                                <tr class="table-row" data-href="index.php?action=laporanSatpam-detail&id=<?= $l['id_laporan'] ?>">
+                                    <td><?= ($page_ditemukan - 1) * $perPage + $i + 1 ?></td>
+                                    <td><strong><?= htmlspecialchars($l['nama_barang']) ?></strong></td>
+                                    <td><span class="badge-cat"><?= ucfirst($l['kategori']) ?></span></td>
+                                    <td><?= htmlspecialchars($l['lokasi']) ?></td>
+                                    <td class="small-text"><?= date('d M Y H:i', strtotime($l['waktu'])) ?></td>
+                                    <td>
+                                        <span class="status-badge <?= $l['status'] === 'menunggu_klaim' ? 'status-waiting' : 'status-claimed' ?>">
+                                            <?= $l['status'] === 'menunggu_klaim' ? 'Menunggu Klaim' : 'Sudah Diambil' ?>
+                                        </span>
+                                    </td>
+                                    <td class="pembuat-info">
+                                        <strong><?= htmlspecialchars($l['nama_pembuat']) ?></strong>
+                                        <?php if ($l['nomor_induk']): ?>
+                                            <div class="nim-text">NIM: <?= htmlspecialchars($l['nomor_induk']) ?></div>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PAGINATION DITEMUKAN -->
+                <div class="table-footer">
+                    <div class="show-entries">
+                        <label>Show</label>
+                        <select onchange="window.location='index.php?action=dashboard&show='+this.value+'&filter_ditemukan=<?= $filter_ditemukan ?>'">
+                            <option value="10" <?= $perPage == 10 ? 'selected' : '' ?>>10</option>
+                            <option value="25" <?= $perPage == 25 ? 'selected' : '' ?>>25</option>
+                            <option value="50" <?= $perPage == 50 ? 'selected' : '' ?>>50</option>
+                            <option value="100" <?= $perPage == 100 ? 'selected' : '' ?>>100</option>
+                        </select>
+                        <span>entries</span>
+                    </div>
+
+                    <div class="pagination">
+                        <?php if ($page_ditemukan > 1): ?>
+                            <a href="index.php?action=dashboard&filter_ditemukan=<?= $filter_ditemukan ?>&page_ditemukan=<?= $page_ditemukan - 1 ?>&show=<?= $perPage ?>" class="pagination-arrow">«</a>
+                        <?php endif; ?>
+
+                        <?php
+                        $startPage = max(1, $page_ditemukan - 2);
+                        $endPage = min($totalPages_ditemukan, $page_ditemukan + 2);
+                        for ($p = $startPage; $p <= $endPage; $p++): ?>
+                            <?php if ($p == $page_ditemukan): ?>
+                                <span class="pagination-number active"><?= $p ?></span>
+                            <?php else: ?>
+                                <a href="index.php?action=dashboard&filter_ditemukan=<?= $filter_ditemukan ?>&page_ditemukan=<?= $p ?>&show=<?= $perPage ?>" class="pagination-number"><?= $p ?></a>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+
+                        <?php if ($page_ditemukan < $totalPages_ditemukan): ?>
+                            <a href="index.php?action=dashboard&filter_ditemukan=<?= $filter_ditemukan ?>&page_ditemukan=<?= $page_ditemukan + 1 ?>&show=<?= $perPage ?>" class="pagination-arrow">»</a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.querySelectorAll('.table-row').forEach(row => {
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', () => {
+            window.location = row.dataset.href;
         });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    });
+</script>
+
+</div> <!-- end .page-container -->
+</main>
 </body>
 
 </html>

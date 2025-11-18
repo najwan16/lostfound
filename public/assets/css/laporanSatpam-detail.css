@@ -1,0 +1,379 @@
+/* ======================================== */
+/* LAPORAN-DETAIL.CSS — PERSIS GAMBAR (2 KONTEN UTAMA) */
+/* ======================================== */
+
+.detail-main-wrapper {
+    background: #ffffff;
+    min-height: 100vh;
+    padding: 3rem 1rem;
+}
+
+/* KONTEN 1: DETAIL LAPORAN */
+.detail-section {
+    background: white;
+    border-radius: 32px;
+    overflow: hidden;
+    margin-bottom: 3rem;
+}
+
+.detail-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+.detail-image-side {
+    display: flex;
+    align-items: baseline;
+}
+
+.detail-barang-img {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+    border-radius: 24px;
+}
+
+.detail-info-side {
+    padding-left: 3rem;
+    padding-right: 3rem;
+    padding-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.93rem;
+}
+
+/* BADGE STATUS BESAR — MERAH = BELUM DITEMUKAN, HIJAU = SUDAH DIAMBIL */
+.status-badge-large {
+    padding: 0.9rem 2.5rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    align-self: flex-start;
+    width: fit-content;
+    color: white;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Belum Ditemukan → Merah */
+.status-missing {
+    background: #e74c3c;
+}
+
+/* Sudah Diambil → Hijau */
+.status-taken {
+    background: #27ae60;
+}
+
+.barang-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.meta-row {
+    display: flex;
+    gap: 2rem;
+    font-size: 1.2rem;
+    color: #7f8c8d;
+}
+
+.meta-box {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.separator {
+    border: none;
+    height: 2px;
+    background: #eee;
+    margin: 1rem 0;
+}
+
+/* PELAPOR + DESKRIPSI */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+
+.pelapor-card,
+.deskripsi-card {
+    background: #ffffff;
+    /* padding: 2rem; */
+    border-radius: 20px;
+}
+
+.pelapor-header,
+.deskripsi-header {
+    font-weight: 700;
+    color: #262832;
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+}
+
+.pelapor-name,
+.pelapor-nim,
+.deskripsi-text {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2c3e50;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+
+
+/* TOMBOL WA */
+.wa-button-box {
+    margin-top: auto;
+
+}
+
+.btn-wa-large {
+    background: #1BA229;
+    color: white;
+    padding: 1.2rem 3rem;
+    border-radius: 12px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    transition: all 0.4s;
+    width: 100%;
+}
+
+.btn-wa-large:hover {
+    background: #3cfb88;
+}
+
+/* KONTEN 2: CATAT PENGAMBIL BARANG */
+.claim-section {
+    background: white;
+    border-radius: 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.claim-header {
+    background: #e67e22;
+    color: white;
+    padding-inline-start: 3rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    text-align: start;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.claim-header.claimed {
+    background: #1BA229;
+}
+
+.claim-content {
+    padding: 3rem;
+}
+
+/* SUDAH DIAMBIL */
+.claimed-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.claimed-field {
+    background: #ffffff;
+    padding: 1.8rem;
+    border-radius: 20px;
+}
+
+.field-label {
+    font-weight: 700;
+    color: #52483f;
+    margin-bottom: 0.8rem;
+    font-size: 1.1rem;
+}
+
+.field-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.bukti-field {
+    padding-left: 1.8rem;
+    grid-column: 1 / -1;
+    text-align: start;
+}
+
+.bukti-image {
+    max-height: 500px;
+    border-radius: 20px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+/* FORM CATAT PENGAMBIL */
+.claim-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.input-group label {
+    font-weight: 700;
+    color: #262832;
+    font-size: 1.1rem;
+}
+
+.input-group input {
+    padding: 1.4rem 1.8rem;
+    /* border: 2px solid #ffd4b3; */
+    border-radius: 18px;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+}
+
+.input-group input:focus {
+    border-color: #e67e22;
+    box-shadow: 0 0 0 5px rgba(230, 126, 34, 0.15);
+}
+
+.suggestions-list {
+    background: white;
+    border: 2px solid #E0E0E0;
+    border-radius: 18px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    display: none;
+}
+
+.suggestion-item {
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+
+.suggestion-item:hover {
+    background: #fff2e8;
+}
+
+.input-full {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.upload-area {
+    border: 3px dashed #E0E0E0;
+    border-radius: 24px;
+    padding: 4rem;
+    text-align: center;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.upload-area:hover {
+    border-color: #e67e22;
+    background: #fff2e8;
+}
+
+.upload-area .material-symbols-outlined {
+    font-size: 5rem;
+    color: #e67e22;
+    margin-bottom: 1rem;
+}
+
+.upload-area p {
+    font-size: 1.3rem;
+    color: #e67e22;
+    font-weight: 600;
+}
+
+.preview-area {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.preview-area img {
+    max-height: 350px;
+    border-radius: 20px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+/* TOMBOL SUBMIT */
+.submit-area {
+    text-align: center;
+}
+
+.btn-submit-claim {
+    background: #e67e22;
+    color: white;
+    border: none;
+    padding: 1.5rem 5rem;
+    border-radius: 7px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.4s;
+    width: 100%;
+}
+
+.btn-submit-claim:hover {
+    background: #d35400;
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+
+    .detail-content,
+    .claimed-info,
+    .input-row {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-image-side,
+    .detail-info-side,
+    .claim-content {
+        padding: 2rem;
+    }
+
+    .barang-title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+
+    .detail-section,
+    .claim-section {
+        border-radius: 24px;
+    }
+
+    .detail-body,
+    .claim-content {
+        padding: 1.5rem;
+    }
+}

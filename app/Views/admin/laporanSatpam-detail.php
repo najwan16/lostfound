@@ -1,17 +1,20 @@
-<!-- app/Views/admin/laporanSatpam-detail.php -->
 <?php
+// app/Views/satpam/laporan-detail.php
+
 require_once dirname(__DIR__, 2) . '../../config/db.php';
+require_once dirname(__DIR__, 2) . '../../app/Controllers/AuthController.php';
 
+$auth = new AuthController();
+$sessionManager = $auth->getSessionManager();
 
-// === CEK SESSION & USER ID ===
-if (!isset($_SESSION['userId']) || $_SESSION['role'] !== 'satpam') {
-    header('Location: /index.php?action=login');
+if ($sessionManager->get('role') !== 'satpam') {
+    header('Location: index.php?action=login');
     exit;
 }
 
 $id_laporan = $_GET['id'] ?? 0;
 if (!$id_laporan || !is_numeric($id_laporan)) {
-    die('<div class="alert alert-danger">Laporan tidak ditemukan.</div>');
+    die('<div class="text-center mt-5"><div class="alert alert-danger">Laporan tidak ditemukan.</div></div>');
 }
 
 $pdo = getDB();
@@ -26,254 +29,237 @@ $stmt->execute([$id_laporan]);
 $laporan = $stmt->fetch();
 
 if (!$laporan) {
-    die('<div class="alert alert-danger">Laporan tidak ditemukan.</div>');
+    die('<div class="text-center mt-5"><div class="alert alert-danger">Laporan tidak ditemukan.</div></div>');
 }
 
 $alreadyTaken = $laporan['status'] === 'sudah_diambil';
 
-// === PATH GAMBAR: SAMA SEPERTI CIVITAS ===
+// PATH GAMBAR
 $baseUpload = 'public/uploads';
-
-// Foto laporan
 $imgSrc = $laporan['foto']
     ? "/{$baseUpload}/laporan/" . basename($laporan['foto'])
-    : 'https://via.placeholder.com/500x500/eeeeee/999999?text=No+Image';
+    : 'https://www.svgrepo.com/show/508699/landscape-placeholder.svg';
 
-// Foto bukti pengambilan
 $fotoBukti = $laporan['foto_bukti']
     ? "/{$baseUpload}/bukti/" . basename($laporan['foto_bukti'])
     : null;
+
+// Untuk sidebar
+$GLOBALS['current_page'] = 'dashboard';
+$title = 'Detail Laporan #' . $id_laporan;
+include 'app/Views/layouts/sidebar.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="id">
+<link rel="stylesheet" href="/public/assets/css/laporanSatpam-detail.css">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail #<?= $id_laporan ?> - Satpam</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <!-- PERBAIKAN: /assets/... -->
-    <link href="public/assets/css/admin.css" rel="stylesheet">
+<div class="detail-main-wrapper">
 
-</head>
+    <!-- KONTEN 1: DETAIL LAPORAN -->
+    <div class="detail-section">
+        <div class="detail-content">
+            <!-- KIRI: GAMBAR -->
+            <div class="detail-image-side">
+                <img src="<?= $imgSrc ?>" alt="Foto Barang" class="detail-barang-img">
+            </div>
 
-<body>
-
-    <!-- SIDEBAR -->
-    <?php include realpath(dirname(__DIR__) . '/layouts/sidebar.php'); ?>
-
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
-        <div class="container-fluid p-4">
-
-            <!-- CARD: DETAIL LAPORAN -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-gradient-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-file-text"></i> Informasi Laporan</h5>
+            <!-- KANAN: INFORMASI -->
+            <div class="detail-info-side">
+                <!-- BADGE STATUS -->
+                <div class="status-badge-large <?= $alreadyTaken ? 'status-taken' : 'status-missing' ?>">
+                    <?= $alreadyTaken ? 'Sudah Diambil' : 'Belum Ditemukan' ?>
                 </div>
-                <div class="card-body">
-                    <div class="row g-4">
-                        <div class="col-lg-5">
-                            <div class="text-center">
-                                <img src="<?= $imgSrc ?>" alt="Foto Barang" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
-                            </div>
-                        </div>
-                        <div class="col-lg-7">
-                            <h3 class="mb-3"><?= htmlspecialchars($laporan['nama_barang']) ?></h3>
-                            <div class="d-flex flex-wrap gap-3 mb-3 text-muted small">
-                                <span><i class="bi bi-geo-alt-fill text-primary"></i> <?= htmlspecialchars($laporan['lokasi']) ?></span>
-                                <span><i class="bi bi-tag-fill text-success"></i> <?= ucfirst($laporan['kategori']) ?></span>
-                                <span><i class="bi bi-calendar-event text-info"></i> <?= date('d M Y, H:i', strtotime($laporan['waktu'])) ?></span>
-                            </div>
 
-                            <hr>
+                <!-- NAMA BARANG -->
+                <h1 class="barang-title"><?= htmlspecialchars($laporan['nama_barang']) ?></h1>
 
-                            <div class="mb-4">
-                                <h6 class="fw-bold">Deskripsi Fisik</h6>
-                                <p class="text-muted"><?= nl2br(htmlspecialchars($laporan['deskripsi_fisik'])) ?></p>
-                            </div>
+                <!-- LOKASI & KATEGORI -->
+                <div class="meta-row">
+                    <div class="meta-box">
+                        <span class="material-symbols-outlined">location_on</span>
+                        <?= htmlspecialchars($laporan['lokasi']) ?>
+                    </div>
+                    <div class="meta-box">
+                        <span class="material-symbols-outlined">category</span>
+                        <?= ucfirst($laporan['kategori']) ?>
+                    </div>
+                </div>
 
-                            <div class="mb-4">
-                                <h6 class="fw-bold">Dilaporkan Oleh</h6>
-                                <p class="mb-1"><?= htmlspecialchars($laporan['nama_pembuat']) ?></p>
-                                <p class="mb-1 text-muted"><?= htmlspecialchars($laporan['nomor_kontak']) ?></p>
-                                <?php if ($laporan['nomor_induk']): ?>
-                                    <p class="mb-0 text-primary fw-bold">NIM: <?= htmlspecialchars($laporan['nomor_induk']) ?></p>
-                                <?php endif; ?>
-                            </div>
+                <hr class="separator">
 
-                            <div class="mb-4">
-                                <span class="badge <?= $laporan['status'] === 'belum_ditemukan' ? 'bg-warning' : 'bg-success' ?> fs-6 px-3 py-2">
-                                    <?= ucfirst(str_replace('_', ' ', $laporan['status'])) ?>
-                                </span>
-                            </div>
-
-                            <!-- JIKA SUDAH DIAMBIL -->
-                            <?php if ($alreadyTaken): ?>
-                                <div class="alert alert-success p-4 rounded">
-                                    <h6 class="fw-bold"><i class="bi bi-check-circle-fill"></i> Barang Sudah Diambil</h6>
-                                    <p class="mb-1"><strong>NIM Pengambil:</strong> <?= htmlspecialchars($laporan['nim_pengambil']) ?></p>
-                                    <p class="mb-2"><strong>Waktu Diambil:</strong> <?= date('d M Y, H:i', strtotime($laporan['waktu_diambil'])) ?></p>
-                                    <?php if ($fotoBukti): ?>
-                                        <div class="mt-3">
-                                            <strong>Bukti Nomor Induk:</strong><br>
-                                            <!-- PERBAIKAN: PAKAI $fotoBukti (sudah /public/uploads/bukti/...) -->
-                                            <a href="<?= $fotoBukti ?>" target="_blank">
-                                                <img src="<?= $fotoBukti ?>" class="img-fluid rounded shadow-sm" style="max-height: 220px;">
-                                            </a>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            <?php endif; ?>
+                <!-- PELAPOR + DESKRIPSI -->
+                <div class="info-grid">
+                    <div class="pelapor-card">
+                        <div class="pelapor-header">Pelapor</div>
+                        <div class="pelapor-name"><?= htmlspecialchars($laporan['nama_pembuat']) ?></div>
+                        <div class="pelapor-contact"><?= htmlspecialchars($laporan['nomor_kontak']) ?></div>
+                        <?php if ($laporan['nomor_induk']): ?>
+                            <div class="pelapor-nim">NIM: <?= htmlspecialchars($laporan['nomor_induk']) ?></div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="deskripsi-card">
+                        <div class="deskripsi-header">Deskripsi Ciri</div>
+                        <div class="deskripsi-text">
+                            <?= nl2br(htmlspecialchars($laporan['deskripsi_fisik'] ?: 'Tidak ada deskripsi')) ?>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- FORM CATAT PENGAMBIL -->
-            <?php if (!$alreadyTaken): ?>
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-gradient-warning text-white">
-                        <h5 class="mb-0"><i class="bi bi-person-check"></i> Catat Pengambil Barang</h5>
+                <!-- TOMBOL WA -->
+                <?php if ($laporan['tipe_laporan'] === 'hilang' && !$alreadyTaken): ?>
+                    <?php
+                    $template = "Halo {$laporan['nama_pembuat']},\n\nKami dari pos satpam FILKOM UB ingin menginformasikan bahwa barang Anda:\n• *Nama Barang:* {$laporan['nama_barang']}\n• *Lokasi Ditemukan:* {$laporan['lokasi']}\n\nSilakan segera hubungi kami untuk verifikasi dan pengambilan.\n\nTerima kasih,\nTim Lost & Found FILKOM UB";
+                    $waLink = $laporan['nomor_kontak'] ? "https://wa.me/" . preg_replace('/\D/', '', $laporan['nomor_kontak']) . "?text=" . urlencode($template) : '#';
+                    ?>
+                    <div class="wa-button-box">
+                        <a href="<?= $waLink ?>" target="_blank" class="btn-wa-large">
+                            <span class="material-symbols-outlined">chat</span>
+                            Kirim Pesan WhatsApp
+                        </a>
                     </div>
-                    <div class="card-body">
-                        <form method="POST" action="/index.php?action=catat_pengambil" enctype="multipart/form-data" id="formCatat">
-                            <input type="hidden" name="id_laporan" value="<?= $id_laporan ?>">
-
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">NIM Pengambil <span class="text-danger">*</span></label>
-                                    <input type="text" name="nim_pengambil" id="nimSearch" class="form-control"
-                                        placeholder="Ketik NIM..." autocomplete="off" required>
-                                    <div id="suggestions" class="list-group position-absolute w-100 mt-1"
-                                        style="z-index:1000; max-height:200px; overflow-y:auto; display:none;"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Nama Lengkap</label>
-                                    <input type="text" id="namaDisplay" class="form-control" readonly placeholder="Akan muncul otomatis">
-                                </div>
-                            </div>
-
-                            <div class="mt-3">
-                                <label class="form-label">Foto Bukti Nomor Induk <span class="text-danger">*</span></label>
-                                <input type="file" name="foto_bukti" class="form-control" accept="image/*" required onchange="previewBukti(event)">
-                                <div id="bukti-preview" class="mt-3 rounded overflow-hidden shadow-sm" style="display:none; max-height:220px;">
-                                    <img id="preview-img" src="" alt="Preview" class="w-100">
-                                </div>
-                            </div>
-
-                            <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-success btn-lg px-5">
-                                    Tandai Sudah Diambil
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <script>
-                    const nimInput = document.getElementById('nimSearch');
-                    const namaDisplay = document.getElementById('namaDisplay');
-                    const suggestions = document.getElementById('suggestions');
-                    let timeout;
-
-                    nimInput.addEventListener('input', function() {
-                        clearTimeout(timeout);
-                        const q = this.value.trim();
-                        if (q.length < 3) {
-                            suggestions.style.display = 'none';
-                            return;
-                        }
-                        timeout = setTimeout(() => {
-                            fetch(`/index.php?action=search_civitas&nim=${encodeURIComponent(q)}`)
-                                .then(r => r.json())
-                                .then(data => {
-                                    suggestions.innerHTML = '';
-                                    if (data.length === 0) {
-                                        suggestions.style.display = 'none';
-                                        return;
-                                    }
-                                    data.forEach(item => {
-                                        const div = document.createElement('div');
-                                        div.className = 'list-group-item list-group-item-action py-2';
-                                        div.innerHTML = `<strong>${item.nomor_induk}</strong><br><small class="text-muted">${item.nama}</small>`;
-                                        div.onclick = () => {
-                                            nimInput.value = item.nomor_induk;
-                                            namaDisplay.value = item.nama;
-                                            suggestions.style.display = 'none';
-                                        };
-                                        suggestions.appendChild(div);
-                                    });
-                                    suggestions.style.display = 'block';
-                                });
-                        }, 300);
-                    });
-
-                    function previewBukti(e) {
-                        const file = e.target.files[0];
-                        const preview = document.getElementById('bukti-preview');
-                        const img = document.getElementById('preview-img');
-                        if (file) {
-                            const reader = new FileReader();
-                            reader.onload = e => {
-                                img.src = e.target.result;
-                                preview.style.display = 'block';
-                            };
-                            reader.readAsDataURL(file);
-                        }
-                    }
-
-                    document.addEventListener('click', e => {
-                        if (!nimInput.contains(e.target) && !suggestions.contains(e.target)) {
-                            suggestions.style.display = 'none';
-                        }
-                    });
-                </script>
-            <?php endif; ?>
-            <?php if ($laporan['tipe_laporan'] === 'hilang' && $laporan['status'] === 'belum_ditemukan'): ?>
-                <?php
-                // Ambil nomor kontak dari akun pembuat laporan
-                $nomor_kontak = $laporan['nomor_kontak'] ?? '';
-                $nama_pemilik = $laporan['nama_pembuat'] ?? 'Pemilik';
-                $nama_barang  = $laporan['nama_barang'] ?? 'barang';
-                $lokasi       = $laporan['lokasi'] ?? 'pos satpam';
-                
-                // Template pesan sesuai modul
-                $template = "Halo {$nama_pemilik},\n\n"
-                    . "Kami dari pos satpam FILKOM UB ingin menginformasikan bahwa barang Anda:\n"
-                    . "• *Nama Barang:* {$nama_barang}\n"
-                    . "• *Lokasi Ditemukan:* {$lokasi}\n\n"
-                    . "Silakan segera hubungi kami untuk verifikasi dan pengambilan.\n\n"
-                    . "Terima kasih,\n"
-                    . "Tim Lost & Found FILKOM UB";
-
-                $wa_link = $nomor_kontak ? "https://wa.me/" . preg_replace('/\D/', '', $nomor_kontak) . "?text=" . urlencode($template) : '#';
-                ?>
-
-                <div class="text-center mt-4">
-                    <a href="<?= $wa_link ?>"
-                        target="_blank"
-                        class="btn btn-success btn-lg d-flex align-items-center justify-content-center gap-2"
-                        <?= $nomor_kontak ? '' : 'disabled onclick="return false;" title="Nomor kontak tidak tersedia"' ?>>
-                        <i class="bi bi-whatsapp"></i>
-                        Hubungi via WhatsApp
-                    </a>
-                </div>
-            <?php endif; ?>
-            <div class="text-center mt-5">
-                <a href="/index.php?action=dashboard" class="btn btn-outline-secondary px-4">
-                    Kembali ke Dashboard
-                </a>
+                <?php endif; ?>
             </div>
-
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- KONTEN 2: CATAT PENGAMBIL BARANG -->
+    <div class="claim-section">
+        <div class="claim-header <?= $alreadyTaken ? 'claimed' : '' ?>">
+            <?= $alreadyTaken ? 'Barang Sudah Diambil' : 'Catat Pengambil Barang' ?>
+        </div>
+
+        <div class="claim-content">
+            <?php if ($alreadyTaken): ?>
+                <!-- SUDAH DIAMBIL -->
+                <div class="claimed-info">
+                    <div class="claimed-grid">
+                        <div class="claimed-field">
+                            <div class="field-label">NIM Pengambil</div>
+                            <div class="field-value"><?= htmlspecialchars($laporan['nim_pengambil']) ?></div>
+                        </div>
+                        <div class="claimed-field">
+                            <div class="field-label">Waktu Diambil</div>
+                            <div class="field-value"><?= date('d M Y, H:i', strtotime($laporan['waktu_diambil'])) ?> WIB</div>
+                        </div>
+                    </div>
+                    <?php if ($fotoBukti): ?>
+                        <div class="bukti-field">
+                            <div class="field-label">Bukti Nomor Induk</div>
+                            <a href="<?= $fotoBukti ?>" target="_blank">
+                                <img src="<?= $fotoBukti ?>" alt="Bukti" class="bukti-image">
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
+                <!-- FORM CATAT PENGAMBIL -->
+                <form method="POST" action="index.php?action=catat_pengambil" enctype="multipart/form-data" class="claim-form">
+                    <input type="hidden" name="id_laporan" value="<?= $id_laporan ?>">
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>NIM Pengambil <span class="required">*</span></label>
+                            <input type="text" name="nim_pengambil" id="nimSearch" placeholder="Masukkan NIM" required>
+                            <div id="suggestions" class="suggestions-list"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>Nama Lengkap <span class="required">*</span></label>
+                            <input type="text" id="namaDisplay" readonly placeholder="Akan muncul otomatis">
+                        </div>
+                    </div>
+                    <!-- Foto Bukti Nomor Induk -->
+                    <div class="input-full">
+                        <label>Foto Bukti Nomor Induk <span class="required">*</span></label>
+                        <div class="upload-area" onclick="document.getElementById('fotoInput').click()">
+                            <span class="material-symbols-outlined">add_photo_alternate</span>
+                            <p>Klik atau drag langsung!</p>
+                            <!-- INPUT FILE DISEMBUNYIKAN TOTAL -->
+                            <input type="file" id="fotoInput" name="foto_bukti" accept="image/*" required onchange="previewBukti(event)" style="display:none;">
+                        </div>
+                        <div id="bukti-preview" class="preview-area" style="display:none;">
+                            <img id="preview-img" src="" alt="Preview">
+                        </div>
+                    </div>
+
+
+                    <div class="submit-area">
+                        <button type="submit" class="btn-submit-claim">
+                            Tandai Sudah Diambil
+                        </button>
+                    </div>
+                </form>
+            <?php endif; ?>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Autocomplete NIM
+    const nimInput = document.getElementById('nimSearch');
+    const namaDisplay = document.getElementById('namaDisplay');
+    const suggestions = document.getElementById('suggestions');
+    let timeout;
+
+    nimInput?.addEventListener('input', function() {
+        clearTimeout(timeout);
+        const q = this.value.trim();
+        if (q.length < 3) {
+            suggestions.innerHTML = '';
+            suggestions.style.display = 'none';
+            return;
+        }
+        timeout = setTimeout(() => {
+            fetch(`index.php?action=search_civitas&nim=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(data => {
+                    suggestions.innerHTML = '';
+                    if (data.length === 0) {
+                        suggestions.style.display = 'none';
+                        return;
+                    }
+                    data.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.innerHTML = `<strong>${item.nomor_induk}</strong> - ${item.nama}`;
+                        div.onclick = () => {
+                            nimInput.value = item.nomor_induk;
+                            namaDisplay.value = item.nama;
+                            suggestions.innerHTML = '';
+                            suggestions.style.display = 'none';
+                        };
+                        suggestions.appendChild(div);
+                    });
+                    suggestions.style.display = 'block';
+                });
+        }, 300);
+    });
+
+    // Preview bukti
+    function previewBukti(e) {
+        const file = e.target.files[0];
+        const preview = document.getElementById('bukti-preview');
+        const img = document.getElementById('preview-img');
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                img.src = e.target.result;
+                preview.style.display = 'block';
+                document.querySelector('.upload-area').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Hide suggestions on outside click
+    document.addEventListener('click', e => {
+        if (nimInput && !nimInput.contains(e.target) && !suggestions.contains(e.target)) {
+            suggestions.style.display = 'none';
+        }
+    });
+</script>
+
+</div> <!-- end .page-container -->
+</main>
 </body>
 
 </html>

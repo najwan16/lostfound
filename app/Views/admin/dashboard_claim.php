@@ -1,146 +1,197 @@
 <?php
+// app/Views/satpam/dashboard_claim.php
 
-$current_page = 'dashboard_claim';
+require_once dirname(__DIR__, 3) . '/config/db.php';
+require_once dirname(__DIR__, 2) . '../../app/Controllers/AuthController.php';
+
+$auth = new AuthController();
+$sessionManager = $auth->getSessionManager();
+
+if ($sessionManager->get('role') !== 'satpam') {
+    header('Location: index.php?action=login');
+    exit;
+}
+
+$pdo = getDB();
+
+// TAB & COUNTS
+$tab = $_GET['tab'] ?? 'masuk';
+$counts = [
+    'diajukan' => $pdo->query("SELECT COUNT(*) FROM claim WHERE status_claim = 'diajukan'")->fetchColumn(),
+    'diverifikasi' => $pdo->query("SELECT COUNT(*) FROM claim WHERE status_claim = 'diverifikasi'")->fetchColumn(),
+    'ditolak' => $pdo->query("SELECT COUNT(*) FROM claim WHERE status_claim = 'ditolak'")->fetchColumn(),
+];
+
+// AMBIL DATA SESUAI TAB
+$status_map = [
+    'masuk' => 'diajukan',
+    'diverifikasi' => 'diverifikasi',
+    'ditolak' => 'ditolak'
+];
+$status = $status_map[$tab] ?? 'diajukan';
+
+$stmt = $pdo->prepare("
+    SELECT c.*, l.nama_barang, l.lokasi, l.kategori, l.foto AS foto_laporan,
+           a.nama AS nama_pengaju, a.nomor_kontak, civ.nomor_induk AS nim_pengaju
+    FROM claim c
+    JOIN laporan l ON c.id_laporan = l.id_laporan
+    JOIN akun a ON c.id_akun = a.id_akun
+    LEFT JOIN civitas civ ON a.id_akun = civ.id_akun
+    WHERE c.status_claim = ?
+    ORDER BY c.created_at DESC
+");
+$stmt->execute([$status]);
+$claimList = $stmt->fetchAll();
+
+$GLOBALS['current_page'] = 'dashboard_claim';
+$title = 'Manajemen Klaim';
+include 'app/Views/layouts/sidebar.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="id">
+<link rel="stylesheet" href="/public/assets/css/dashboard_claim.css">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Claim</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-    <link href="public/assets/css/admin.css" rel="stylesheet">
+<div class="claim-wrapper">
 
-</head>
+    <div class="container-fluid">
 
-<body>
-    <?php include __DIR__ . '/../layouts/sidebar.php'; ?>
+        <!-- TAB COUNTER -->
+        <div class="tab-counter mb-5">
+            <a href="index.php?action=dashboard_claim&tab=masuk" class="counter-item <?= $tab === 'masuk' ? 'active' : '' ?>">
+                <span class="count masuk"><?= $counts['diajukan'] ?></span>
+                Masuk
+            </a>
+            <a href="index.php?action=dashboard_claim&tab=diverifikasi" class="counter-item <?= $tab === 'diverifikasi' ? 'active' : '' ?>">
+                <span class="count diverifikasi"><?= $counts['diverifikasi'] ?></span>
+                Disetujui
+            </a>
+            <a href="index.php?action=dashboard_claim&tab=ditolak" class="counter-item <?= $tab === 'ditolak' ? 'active' : '' ?>">
+                <span class="count ditolak"><?= $counts['ditolak'] ?></span>
+                Ditolak
+            </a>
+        </div>
 
-    <div class="main-content">
-        <div class="container-fluid p-4">
-            <h3 class="mb-4">Manajemen Claim</h3>
+        <!-- LIST KLAIM -->
+        <?php if (empty($claimList)): ?>
+            <div class="empty-state">
+                <span class="material-symbols-outlined">inbox</span>
+                <p>Tidak ada klaim <?= $tab === 'masuk' ? 'baru' : ($tab === 'diverifikasi' ? 'disetujui' : 'ditolak') ?>.</p>
+            </div>
+        <?php else: ?>
+            <div class="claim-grid">
+                <?php foreach ($claimList as $c):
+                    $fotoLaporan = $c['foto_laporan'] ? "/public/uploads/laporan/" . basename($c['foto_laporan']) : 'https://via.placeholder.com/400x300/eee/999?text=No+Image';
+                    $fotoBukti = $c['bukti_kepemilikan'] ? "/public/uploads/bukti_claim/" . basename($c['bukti_kepemilikan']) : null;
 
-            <!-- TAB -->
-            <ul class="nav nav-tabs mb-4">
-                <li class="nav-item">
-                    <a class="nav-link <?= $tab === 'masuk' ? 'active' : '' ?>"
-                        href="index.php?action=dashboard_claim&tab=masuk">
-                        Masuk <span class="badge bg-warning text-dark"><?= $counts['diajukan'] ?></span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= $tab === 'diverifikasi' ? 'active' : '' ?>"
-                        href="index.php?action=dashboard_claim&tab=diverifikasi">
-                        Diverifikasi <span class="badge bg-success"><?= $counts['diverifikasi'] ?></span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= $tab === 'ditolak' ? 'active' : '' ?>"
-                        href="index.php?action=dashboard_claim&tab=ditolak">
-                        Ditolak <span class="badge bg-danger"><?= $counts['ditolak'] ?></span>
-                    </a>
-                </li>
-            </ul>
-
-            <!-- LIST CLAIM -->
-            <?php if (empty($claimList)): ?>
-                <div class="alert alert-light text-center p-5 rounded border">
-                    <i class="material-symbols-outlined fs-1 text-secondary">inbox</i>
-                    <p class="mt-3 mb-0 fs-5"><strong>Tidak ada claim <?= $tab ?>.</strong></p>
-                </div>
-            <?php else: ?>
-                <div class="row g-4">
-                    <?php foreach ($claimList as $claim): ?>
-                        <div class="col-lg-6 col-xxl-4">
-                            <div class="card border-0 shadow-sm h-100">
-                                <div class="card-header bg-light border-0 py-3">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="mb-0 text-primary fw-bold">
-                                            #<?= $claim['id_claim'] ?> - <?= htmlspecialchars($claim['nama_barang']) ?>
-                                        </h6>
-                                        <small class="text-muted">
-                                            <?= date('d M Y', strtotime($claim['created_at'])) ?>
-                                        </small>
-                                    </div>
+                    // WA Link
+                    $waText = "Halo {$c['nama_pengaju']}, klaim Anda untuk barang *{$c['nama_barang']}* sedang kami proses. Silakan hubungi pos satpam untuk pengambilan.";
+                    $waLink = $c['nomor_kontak'] ? "https://wa.me/" . preg_replace('/\D/', '', $c['nomor_kontak']) . "?text=" . urlencode($waText) : '#';
+                ?>
+                    <div class="claim-card" onclick="openClaimModal(<?= $c['id_claim'] ?>)">
+                        <div class="claim-image">
+                            <img src="<?= $fotoLaporan ?>" alt="Foto Barang">
+                        </div>
+                        <div class="claim-info">
+                            <h5><?= htmlspecialchars($c['nama_barang']) ?></h5>
+                            <div class="claim-meta">
+                                <span><span class="material-symbols-outlined">location_on</span> <?= htmlspecialchars($c['lokasi']) ?></span>
+                                <span><span class="material-symbols-outlined">category</span> <?= ucfirst($c['kategori']) ?></span>
+                            </div>
+                            <?php if ($tab === 'masuk'): ?>
+                                <div class="claim-actions">
+                                    <button class="btn-setuju" onclick="verifikasiClaim(<?= $c['id_claim'] ?>, <?= $c['id_laporan'] ?>, 'diverifikasi', event)">Setuju</button>
+                                    <button class="btn-tolak" onclick="verifikasiClaim(<?= $c['id_claim'] ?>, <?= $c['id_laporan'] ?>, 'ditolak', event)">Tolak</button>
                                 </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
 
-                                <div class="card-body p-4">
-                                    <div class="row g-3 mb-4">
-                                        <div class="col-6">
-                                            <p class="mb-1"><strong>Pengaju:</strong></p>
-                                            <p class="mb-1 fw-semibold"><?= htmlspecialchars($claim['nama_pengaju']) ?></p>
-                                            <p class="mb-0 text-primary fw-bold">NIM: <?= htmlspecialchars($claim['nim_pengaju']) ?></p>
-                                        </div>
-                                        <div class="col-6 text-end">
-                                            <p class="mb-1"><strong>Lokasi:</strong> <?= htmlspecialchars($claim['lokasi']) ?></p>
-                                            <p class="mb-0"><strong>Kategori:</strong> <?= ucfirst($claim['kategori']) ?></p>
-                                        </div>
-                                    </div>
+                    <!-- MODAL DETAIL KLAIM -->
+                    <div id="modal-<?= $c['id_claim'] ?>" class="claim-modal">
+                        <div class="modal-content">
+                            <span class="modal-close" onclick="closeModal(<?= $c['id_claim'] ?>)">&times;</span>
+                            <div class="modal-body">
+                                <div class="modal-left">
+                                    <img src="<?= $fotoLaporan ?>" alt="Foto Laporan" class="modal-image">
+                                    <h5><?= htmlspecialchars($c['nama_barang']) ?></h5>
+                                    <p><span class="material-symbols-outlined">location_on</span> <?= htmlspecialchars($c['lokasi']) ?></p>
+                                    <p><span class="material-symbols-outlined">category</span> <?= ucfirst($c['kategori']) ?></p>
 
-                                    <div class="text-center mb-4">
-                                        <a href="/public/<?= $claim['foto'] ?>" target="_blank">
-                                            <img src="/public/<?= $claim['foto'] ?>" alt="Foto Barang" class="img-fluid rounded shadow-sm card-img">
-                                        </a>
-                                        <p class="small text-muted mt-2 mb-0">Klik untuk perbesar</p>
-                                    </div>
+                                    <h6 class="civitas-title">Profil Pengambil Barang</h6>
+                                    <a class="civitas-name"><?= htmlspecialchars($c['nama_pengaju']) ?></a>
+                                    <a class="civitas-nim">NIM: <?= htmlspecialchars($c['nim_pengaju'] ?? 'Tidak ada NIM') ?></a>
+                                    <a class="civitas-contact">Kontak: <?= htmlspecialchars($c['nomor_kontak']) ?></a>
 
-                                    <div class="border-top pt-3 mb-4">
-                                        <p class="mb-1 fw-bold">Deskripsi Ciri:</p>
-                                        <p class="text-muted small"><?= nl2br(htmlspecialchars($claim['deskripsi_ciri'])) ?: '<em>Tidak ada</em>' ?></p>
-                                    </div>
+                                    <a href="<?= $waLink ?>" target="_blank" class="btn-wa-modal">
+                                        <span class="material-symbols-outlined">chat</span>
+                                        Hubungi Pengambil
+                                    </a>
+                                </div>
+                                <div class="modal-right">
+                                    <h5>Pengaju</h5>
+                                    <p class="pengaju-name"><?= htmlspecialchars($c['nama_pengaju']) ?></p>
+                                    <p class="pengaju-nim"><?= htmlspecialchars($c['nim_pengaju']) ?></p>
 
-                                    <div class="text-center mb-4">
-                                        <p class="mb-2 fw-bold">Bukti Kepemilikan:</p>
-                                        <a href="/public/<?= $claim['bukti_kepemilikan'] ?>" target="_blank">
-                                            <img src="/public/<?= $claim['bukti_kepemilikan'] ?>" alt="Bukti" class="img-fluid rounded shadow-sm card-img">
-                                        </a>
-                                        <p class="small text-muted mt-2 mb-0">Klik untuk perbesar</p>
-                                    </div>
-
-                                    <?php if ($tab === 'masuk'): ?>
-                                        <div class="d-grid d-md-flex gap-2 justify-content-center">
-                                            <form method="POST" action="index.php?action=verifikasi_claim" class="d-inline">
-                                                <input type="hidden" name="id_claim" value="<?= $claim['id_claim'] ?>">
-                                                <input type="hidden" name="id_laporan" value="<?= $claim['id_laporan'] ?>">
-                                                <input type="hidden" name="status" value="diverifikasi">
-                                                <button type="submit" class="btn btn-success btn-sm">Setujui</button>
-                                            </form>
-                                            <form method="POST" action="index.php?action=verifikasi_claim" class="d-inline">
-                                                <input type="hidden" name="id_claim" value="<?= $claim['id_claim'] ?>">
-                                                <input type="hidden" name="status" value="ditolak">
-                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin tolak claim ini?')">
-                                                    Tolak
-                                                </button>
-                                            </form>
-                                        </div>
+                                    <h6 class="mt-4">Bukti Kepemilikan</h6>
+                                    <?php if ($fotoBukti): ?>
+                                        <img src="<?= $fotoBukti ?>" alt="Bukti" class="bukti-image">
                                     <?php else: ?>
-                                        <div class="text-center">
-                                            <span class="badge <?= $claim['status_claim'] === 'diverifikasi' ? 'bg-success' : 'bg-danger' ?>">
-                                                <?= ucfirst($claim['status_claim']) ?>
-                                            </span>
-                                            <small class="text-muted d-block">
-                                                Diproses: <?= date('d M Y H:i', strtotime($claim['updated_at'])) ?>
-                                            </small>
-                                        </div>
+                                        <p class="text-muted">Tidak ada bukti</p>
                                     <?php endif; ?>
+
+                                    <h6 class="mt-4">Deskripsi Ciri</h6>
+                                    <p class="deskripsi-text"><?= nl2br(htmlspecialchars($c['deskripsi_ciri'] ?: 'Tidak ada deskripsi')) ?></p>
                                 </div>
                             </div>
                         </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-
-            <!-- TOMBOL KEMBALI -->
-            <div class="text-center mt-5">
-                <a href="index.php?action=dashboard" class="btn btn-outline-secondary px-5 py-2">
-                    Kembali ke Dashboard
-                </a>
+                    </div>
+                <?php endforeach; ?>
             </div>
-        </div>
+        <?php endif; ?>
+
     </div>
+</div>
+
+<script>
+    function openClaimModal(id) {
+        document.getElementById('modal-' + id).style.display = 'flex';
+    }
+
+    function closeModal(id) {
+        document.getElementById('modal-' + id).style.display = 'none';
+    }
+
+    function verifikasiClaim(id_claim, id_laporan, status, event) {
+        event.stopPropagation();
+        if (!confirm(status === 'diverifikasi' ? 'Setujui klaim ini?' : 'Tolak klaim ini?')) return;
+
+        const form = new FormData();
+        form.append('id_claim', id_claim);
+        form.append('id_laporan', id_laporan);
+        form.append('status', status);
+
+        fetch('index.php?action=verifikasi_claim', {
+                method: 'POST',
+                body: form
+            }).then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    location.reload();
+                } else {
+                    alert('Gagal memproses klaim');
+                }
+            });
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(e) {
+        if (e.target.classList.contains('claim-modal')) {
+            e.target.style.display = 'none';
+        }
+    }
+</script>
+
+</div> <!-- end .page-container -->
+</main>
 </body>
 
 </html>
