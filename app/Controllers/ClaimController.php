@@ -51,7 +51,7 @@ class ClaimController
             die('Data pengguna tidak ditemukan.');
         }
 
-        // KIRIM SEMUA VARIABEL YANG DIBUTUHKAN VIEW!
+        // KIRIM SEMUA VARIABEL YANG DIBUTUHKAN VIEW!   
         require 'app/Views/civitas/claim_form.php';
     }
 
@@ -86,12 +86,26 @@ class ClaimController
         }
 
         $idAkun = $this->session->get('userId');
-        $tab = $_GET['tab'] ?? 'diajukan';
-        $valid = ['diajukan', 'diverifikasi', 'ditolak'];
-        $tab = in_array($tab, $valid) ? $tab : 'diajukan';
 
-        $claimList = $this->model->getMyClaims($idAkun, $tab);
+        // === PERBAIKAN DI SINI ===
+        $tab = $_GET['tab'] ?? 'semua';                // default semua
+        $allowedTabs = ['semua', 'diajukan', 'diverifikasi', 'ditolak'];
+        $tab = in_array($tab, $allowedTabs) ? $tab : 'semua';
+        // =========================
+
+        // Kirim semua claim (nanti di-filter di model atau di view)
+        $claimList = $this->model->getMyClaimsAll($idAkun); // fungsi baru, lihat di bawah
+
+        // Hitung jumlah per status (untuk badge kalau mau)
         $counts = $this->model->countMyClaims($idAkun);
+
+        // Kirim variabel ke view
+        extract([
+            'claimList' => $claimList,
+            'counts'    => $counts,
+            'tab'       => $tab,           // penting dikirim supaya sidebar active benar
+            'current_page' => 'claim_saya'
+        ]);
 
         require 'app/Views/civitas/claim_saya.php';
     }

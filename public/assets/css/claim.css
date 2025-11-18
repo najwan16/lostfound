@@ -1,0 +1,211 @@
+/* public/assets/css/claim.css */
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.content-wrapper {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* Sidebar kiri 25% */
+.sidebar {
+    flex: 0 0 25%;
+    max-width: 25%;
+}
+
+.filter-box {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Hilangkan underline di semua filter */
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    color: #555;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-decoration: none !important;
+    /* PASTI TIDAK ADA GARIS BAWAH */
+}
+
+.filter-btn:hover {
+    background: #fff0e6;
+    color: #e67e22;
+    text-decoration: none !important;
+}
+
+.filter-btn.active {
+    background: #e67e22;
+    color: white;
+}
+
+.filter-btn .material-symbols-outlined {
+    font-size: 20px;
+}
+
+/* Garis pemisah antar filter */
+.filter-box .filter-btn+.filter-btn {
+    border-top: 1px solid #eee;
+    margin-top: 12px;
+    padding-top: 20px;
+}
+
+/* Konten kanan 75% */
+.cards-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Card Claim */
+.claim-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.claim-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    text-decoration: none;
+}
+
+.claim-card .card-image {
+    position: relative;
+}
+
+.claim-card .card-image img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+}
+
+.claim-card .card-status {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+}
+
+/* Warna status */
+.status-pending {
+    background: #f39c12;
+}
+
+.status-approved {
+    background: #27ae60;
+}
+
+.status-rejected {
+    background: #e74c3c;
+}
+
+.claim-card .card-content {
+    padding: 1rem;
+}
+
+.claim-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+    color: #2c3e50;
+}
+
+.status-note {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.note-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.note-approved {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.note-rejected {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-note {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.note-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.note-approved {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.note-rejected {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.card-info {
+    font-size: 0.9rem;
+    color: #262832;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.info-item .material-symbols-outlined {
+    font-size: 18px;
+    color: #262832;
+}
+
+.no-claim {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 0;
+    color: #262832;
+    font-size: 1.1rem;
+}

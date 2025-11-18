@@ -46,11 +46,7 @@
                                 <?= $f['label'] ?>
                             </a>
                         <?php endforeach; ?>
-                        <div class="text-center mt-4">
-                            <a href="index.php?action=claim_saya" class="btn btn-primary px-5">
-                                Lihat Pengajuan Klaim Saya
-                            </a>
-                        </div>
+
                     </div>
                 </div>
 

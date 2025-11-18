@@ -28,11 +28,10 @@
                     <a class="nav-link <?= $currentPage === 'home' ? 'active' : '' ?>" href="index.php?action=home">Beranda</a>
                     <?php if ($controller->getSessionManager()->get('userId')): ?>
                         <a class="nav-link <?= $currentPage === 'search' ? 'active' : '' ?>" href="index.php?action=search">Cari</a>
-                        <a class="nav-link <?= $currentPage === 'laporan' ? 'active' : '' ?>" href="index.php?action=laporan">Laporan</a>
-                        <a class="nav-link <?= $currentPage === 'profile' ? 'active' : '' ?>" href="index.php?action=profile">Profil</a>
+                        <a class="nav-link <?= $currentPage === 'laporan' ? 'active' : '' ?>" href="index.php?action=laporan">Riwayat Laporan</a>
+                        <a class="nav-link <?= $currentPage === 'claim_saya' ? 'active' : '' ?>" href="index.php?action=claim_saya">Riwayat Klaim</a>
                     <?php else: ?>
                         <a class="nav-link <?= $currentPage === 'search' ? 'active' : '' ?>" href="index.php?action=search">Cari</a>
-                        <a class="nav-link <?= $currentPage === 'laporan-form' ? 'active' : '' ?>" href="index.php?action=laporan-form">Laporan</a>
                     <?php endif; ?>
                 </div>
 

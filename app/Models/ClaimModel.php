@@ -183,4 +183,22 @@ class ClaimModel
             error_log("ClaimModel::updateLaporanStatus error: " . $e->getMessage());
         }
     }
+
+    public function getMyClaimsAll($idAkun)
+    {
+        try {
+            $stmt = $this->database->prepare("
+            SELECT c.*, l.nama_barang, l.foto AS foto_laporan, l.lokasi, l.kategori
+            FROM claim c
+            LEFT JOIN laporan l ON c.id_laporan = l.id_laporan
+            WHERE c.id_akun = ? 
+            ORDER BY c.created_at DESC
+        ");
+            $stmt->execute([$idAkun]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("ClaimModel::getMyClaimsAll error: " . $e->getMessage());
+            return [];
+        }
+    }
 }
