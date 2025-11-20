@@ -1,5 +1,7 @@
 <?php
+
 $GLOBALS['current_page'] = 'mail';
+$current_page = 'mail';
 $title = 'Kotak Masuk - Lost & Found FILKOM';
 include 'app/Views/layouts/sidebar.php';
 ?>

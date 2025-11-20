@@ -118,7 +118,8 @@ body {
     background: white;
     border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e0e0e0;
+
 }
 
 .filter-btn {
@@ -127,15 +128,15 @@ body {
     align-items: center;
     gap: 12px;
     padding: 14px 18px;
-    border: none;
+    border: 1px solid #e0e0e0;
     border-radius: 12px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     margin-bottom: 8px;
-    background: #f8f9fa;
-    color: #555;
+    background: #ffffff;
+    color: #262832;
 }
 
 .filter-btn.active {
@@ -171,7 +172,6 @@ body {
     background: white;
     border-radius: 28px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
     cursor: pointer;
     position: relative;
@@ -202,9 +202,7 @@ body {
 }
 
 .card-status {
-    position: absolute;
-    top: 12px;
-    right: 12px;
+    margin-bottom: 1rem;
     padding: 6px 14px;
     border-radius: 20px;
     font-size: 11px;
@@ -245,8 +243,8 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
-    color: #666;
+    font-size: 15px;
+    color: #262832;
 }
 
 .info-icon {

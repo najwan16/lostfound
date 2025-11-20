@@ -139,12 +139,12 @@ if ($userRole === 'civitas' && $laporan['status'] === 'sudah_diambil') {
                     <?php if ($claimInfo === 'button'): ?>
                         <a href="index.php?action=claim&id=<?= $laporan['id_laporan'] ?>"
                             class="claim-btn d-inline-flex align-items-center justify-content-center">
-                            <i class="bi bi-shield-check me-2"></i> claim Kepemilikan
+                            <i class="bi bi-shield-check me-2"></i> klaim Kepemilikan
                         </a>
                     <?php elseif ($claimInfo === 'already'): ?>
                         <div class="alert alert-info d-inline-block p-3">
                             <i class="bi bi-check-circle-fill me-2"></i>
-                            Anda sudah mengajukan claim untuk barang ini
+                            Anda sudah mengajukan klaim untuk barang ini
                         </div>
                     <?php elseif ($laporan['id_akun'] == $userId): ?>
                         <small class="text-muted d-block">

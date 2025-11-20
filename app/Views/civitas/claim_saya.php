@@ -38,7 +38,6 @@ $hideNote = ($tab === 'semua');
     <?php include realpath(dirname(__DIR__) . '/layouts/navbar.php'); ?>
 
     <div class="container">
-        <h2 class="mt-5 mb-4 fw-bold text-dark">Riwayat Klaim Saya</h2>
 
         <div class="content-wrapper">
             <!-- Sidebar Filter -->
@@ -95,8 +94,6 @@ $hideNote = ($tab === 'semua');
 
                         $st = $config[$status] ?? $config['diajukan'];
 
-                        // Gambar dari LAPORAN (foto barang yang ditemukan)
-                        // Gambar dari LAPORAN (foto barang yang ditemukan) — DIPERBAIKI
                         $imgSrc = !empty($claim['foto_laporan'])
                             ? '/public/uploads/laporan/' . basename($claim['foto_laporan'])
                             : (!empty($claim['bukti_kepemilikan'])
@@ -112,14 +109,16 @@ $hideNote = ($tab === 'semua');
                                 <img src="<?= $imgSrc ?>"
                                     alt="<?= $namaBarang ?>"
                                     onerror="this.src='https://via.placeholder.com/400x300/eeeeee/999999?text=Barang'">
-                                <span class="card-status <?= $st['class'] ?>">
-                                    <?= $st['text'] ?>
-                                </span>
+
                             </div>
 
                             <div class="card-content">
                                 <!-- HANYA NAMA BARANG, TANPA ID -->
+                                <span class="card-status <?= $st['class'] ?>">
+                                    <?= $st['text'] ?>
+                                </span>
                                 <h3 class="card-title fw-bold">
+
                                     <?= $namaBarang ?>
                                 </h3>
 

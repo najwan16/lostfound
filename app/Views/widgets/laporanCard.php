@@ -46,15 +46,19 @@ $filtered = ($filter === 'semua')
                         alt="<?= htmlspecialchars($item['nama_barang'] ?? 'Barang') ?>"
                         onerror="this.src='<?= $defaultImg ?>'; this.onerror=null;"
                         style="width:100%; height:200px; object-fit:cover; display:block; border-radius:8px;">
-                    <span class="card-status <?= $statusClass ?>">
-                        <?= $statusText ?>
-                    </span>
+
                 </div>
                 <div class="card-content">
                     <h3 class="card-title">
+                         <div class="info-item">
+                            <span class="card-status <?= $statusClass ?>">
+                                <?= $statusText ?>
+                        </div>
+
                         <?= htmlspecialchars($item['nama_barang'] ?? 'Tanpa Nama') ?>
                     </h3>
-                    <div class="card-info">
+                    <div class="card-info">            
+                        </span>
                         <div class="info-item">
                             <span class="material-symbols-outlined">pin_drop</span>
                             <span><?= htmlspecialchars($item['lokasi'] ?? 'Lokasi tidak diketahui') ?></span>

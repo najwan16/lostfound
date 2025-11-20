@@ -1,5 +1,5 @@
 /* ======================================== */
-/* CLAIM.CSS — PERSIS GAMBAR (COUNTER + CARD + MODAL) */
+/* DASHBOARD_CLAIM.CSS – FINAL & CLEAN    */
 /* ======================================== */
 
 .claim-wrapper {
@@ -8,64 +8,176 @@
     padding: 2rem 0;
 }
 
-/* COUNTER ATAS */
-.tab-counter {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    margin-bottom: 3rem;
-    flex-wrap: wrap;
-}
-
-.counter-item {
+/* Container utama – penting untuk centering empty state */
+.claim-wrapper .container-fluid {
+    min-height: 75vh;
     display: flex;
     flex-direction: column;
+}
+
+/* ==================== STATUS TABS ==================== */
+.status-tabs {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+@media (max-width: 576px) {
+    .status-tabs {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+}
+
+.status-tab {
+    display: flex;
     align-items: center;
-    gap: 0.8rem;
-    padding: 1rem 2rem;
+    gap: 1rem;
+    padding: 0.6rem 2rem;
     border-radius: 50px;
-    min-width: 140px;
     font-weight: 600;
     text-decoration: none;
+    min-width: 190px;
     transition: all 0.3s ease;
-    color: #666;
 }
 
-.counter-item.active {
-    color: rgb(0, 0, 0);
-}
-
-.counter-item .count {
-    width: 60px;
-    height: 60px;
+/* Lingkaran count */
+.status-tab .status-count {
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.counter-item.active .count.masuk {
-    background: #ff9800;
+/* Warna default (non-active) */
+.status-tab.masuk {
+    border: 3px solid #E57229;
+    color: #E57229;
 }
 
-.counter-item.active .count.diverifikasi {
-    background: #4caf50;
+.status-tab.diverifikasi {
+    border: 3px solid #1BA229;
+    color: #1BA229;
 }
 
-.counter-item.active .count.ditolak {
-    background: #f44336;
+.status-tab.ditolak {
+    border: 3px solid #CF1111;
+    color: #CF1111;
 }
 
-/* CARD GRID */
+.status-tab.masuk .status-count {
+    background: #E57229;
+    color: white;
+}
+
+.status-tab.diverifikasi .status-count {
+    background: #1BA229;
+    color: white;
+}
+
+.status-tab.ditolak .status-count {
+    background: #CF1111;
+    color: white;
+}
+
+/* Active state */
+.status-tab.active {
+    color: white !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.status-tab.active.masuk {
+    background: #E57229;
+}
+
+.status-tab.active.diverifikasi {
+    background: #1BA229;
+}
+
+.status-tab.active.ditolak {
+    background: #CF1111;
+}
+
+.status-tab.active .status-count {
+    background: white !important;
+}
+
+.status-tab.active.masuk .status-count {
+    color: #E57229;
+}
+
+.status-tab.active.diverifikasi .status-count {
+    color: #1BA229;
+}
+
+.status-tab.active.ditolak .status-count {
+    color: #CF1111;
+}
+
+/* Hover */
+.status-tab:hover:not(.active) {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.status-tab.active:hover {
+    opacity: 0.95;
+}
+
+/* ==================== EMPTY STATE – SELALU TENGAH ==================== */
+.empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #94a3b8;
+    padding: 3rem 1rem;
+}
+
+.empty-state .material-symbols-outlined {
+    font-size: 6.5rem;
+    opacity: 0.25;
+    margin-bottom: 1.5rem;
+    animation: float 6s ease-in-out infinite;
+}
+
+.empty-state p {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #64748b;
+    margin: 0;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-16px);
+    }
+}
+
+/* ==================== CLAIM GRID & CARD ==================== */
 .claim-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
     gap: 2rem;
-    max-width: 1400px;
+    max-width: 1350px;
     margin: 0 auto;
-    padding: 0 1rem;
 }
 
 .claim-card {
@@ -91,7 +203,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.4s ease;
+    transition: transform 0.4s;
 }
 
 .claim-card:hover .claim-image img {
@@ -132,24 +244,14 @@
 .btn-setuju,
 .btn-tolak {
     flex: 1;
-    padding: 0.8rem;
+    padding: 0.85rem;
     border-radius: 50px;
     font-weight: 600;
-    border: none;
+    border: 2px solid #E57229;
+    background: white;
+    color: #E57229;
     cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-setuju {
-    background: white;
-    color: #E57229;
-    border: 2px solid #E57229;
-}
-
-.btn-tolak {
-    background: white;
-    color: #E57229;
-    border: 2px solid #E57229;
+    transition: 0.3s;
 }
 
 .btn-setuju:hover {
@@ -160,19 +262,15 @@
 .btn-tolak:hover {
     background: #d65f1f;
     color: white;
-
 }
 
-/* MODAL */
+/* ==================== MODAL ==================== */
 .claim-modal {
     display: none;
     position: fixed;
     z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
     align-items: center;
     justify-content: center;
     padding: 2rem;
@@ -193,7 +291,7 @@
     position: absolute;
     top: 1rem;
     right: 1.5rem;
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     cursor: pointer;
     color: #999;
     z-index: 10;
@@ -210,33 +308,12 @@
     padding: 3rem;
 }
 
-.modal-left,
-.modal-right {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
 .modal-image {
     width: 100%;
-    max-height: 350px;
+    max-height: 360px;
     object-fit: cover;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-}
-
-.modal-left h5 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #1e293b;
-}
-
-.modal-left p {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    color: #666;
-    font-size: 1.1rem;
 }
 
 .btn-wa-modal {
@@ -247,21 +324,20 @@
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 1rem;
     font-weight: 600;
     box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
-    transition: all 0.3s;
+    transition: 0.3s;
 }
 
 .btn-wa-modal:hover {
     background: #128c7e;
-    transform: translateY(-5px);
+    transform: translateY(-4px);
 }
 
 .bukti-image {
     width: 100%;
-    max-height: 300px;
+    max-height: 320px;
     object-fit: contain;
     border-radius: 16px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -275,20 +351,7 @@
     color: #444;
 }
 
-/* EMPTY STATE */
-.empty-state {
-    text-align: center;
-    padding: 5rem 2rem;
-    color: #999;
-}
-
-.empty-state .material-symbols-outlined {
-    font-size: 5rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-}
-
-/* RESPONSIVE */
+/* Responsive */
 @media (max-width: 992px) {
     .modal-body {
         grid-template-columns: 1fr;
@@ -298,11 +361,10 @@
 @media (max-width: 576px) {
     .claim-grid {
         grid-template-columns: 1fr;
-        padding: 0 1rem;
+        padding: 0 0.5rem;
     }
 
-    .modal-content {
-        margin: 1rem;
-        border-radius: 20px;
+    .status-tab {
+        min-width: 260px;
     }
 }

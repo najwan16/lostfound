@@ -24,7 +24,6 @@
     padding: 1.5rem;
     background: white;
     border-radius: 16px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     transition: all 0.25s ease;
     cursor: pointer;
     border: 1px solid transparent;
@@ -49,7 +48,7 @@
     right: 1.5rem;
     width: 10px;
     height: 10px;
-    background: #0d6efd;
+    background: #E57229;
     border-radius: 50%;
     animation: pulse 2s infinite;
 }
@@ -67,12 +66,12 @@
 /* Kiri: Nama + Meta */
 .notif-left h6 {
     margin: 0 0 0.75rem;
-    font-size: 1.15rem;
+    font-size: 1.3rem;
     color: #1e293b;
 }
 
 .badge-new {
-    background: #0d6efd;
+    background: #E57229;
     color: white;
     font-size: 0.7rem;
     padding: 0.25rem 0.6rem;
@@ -97,7 +96,7 @@
 
 .meta-item .material-symbols-outlined {
     font-size: 18px;
-    color: #0d6efd;
+    color: #1C1B1F;
 }
 
 /* Kanan: Tanggal + Tombol */
@@ -105,18 +104,18 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 1rem;
+    gap: 2.3rem;
     text-align: right;
 }
 
 .notif-time {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: #888;
     font-weight: 500;
 }
 
 .btn-detail-outline {
-    background: white;
+    background: #F5F5F5;
     color: #E57229;
     border: 2px solid #E57229;
     padding: 0.5rem 1.5rem;

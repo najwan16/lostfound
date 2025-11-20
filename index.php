@@ -358,6 +358,7 @@ switch ($action) {
 
     case 'claim_saya':
         $claimController->showMyClaims();
+
         break;
 
     // ==================================================================
@@ -496,8 +497,8 @@ switch ($action) {
     //  NOTIFIKASI: SATPAM
     // ==================================================================
     case 'mail':
-        $GLOBALS['sessionManager'] = $sessionManager;
         $GLOBALS['current_page'] = 'mail';
+        $GLOBALS['sessionManager'] = $sessionManager;
         $notifikasiController->index();
         break;
 
