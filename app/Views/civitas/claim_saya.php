@@ -104,7 +104,7 @@ $hideNote = ($tab === 'semua');
                         $namaBarang = htmlspecialchars($claim['nama_barang'] ?? 'Barang Tidak Diketahui');
                         ?>
 
-                        <a href="index.php?action=claim_detail&id=<?= $claim['id_claim'] ?>" class="claim-card text-decoration-none">
+                        <a <?= $claim['id_claim'] ?>" class="claim-card text-decoration-none">
                             <div class="card-image">
                                 <img src="<?= $imgSrc ?>"
                                     alt="<?= $namaBarang ?>"

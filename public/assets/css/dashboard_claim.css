@@ -351,6 +351,54 @@
     color: #444;
 }
 
+/* Tombol Hijau "Hubungi Pengambil Barang" – persis seperti gambar */
+.btn-hubungi-pengambil {
+    background: #25d366;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+    transition: all 0.3s;
+    margin-top: 1.5rem;
+}
+
+.btn-hubungi-pengambil:hover {
+    background: #128c7e;
+    transform: translateY(-4px);
+}
+
+/* Section pengaju klaim */
+.pengaju-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+}
+
+/* Responsif modal */
+@media (max-width: 992px) {
+    .modal-body {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-left,
+    .modal-right {
+        text-align: center;
+    }
+
+    .btn-hubungi-pengambil {
+        width: 100%;
+        max-width: 320px;
+    }
+}
+
 /* Responsive */
 @media (max-width: 992px) {
     .modal-body {
