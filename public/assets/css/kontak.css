@@ -1,0 +1,116 @@
+body {
+    background-color: #ffffff;
+    font-family: "Roboto", sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+.login-container {
+    display: flex;
+    width: 90%;
+    max-width: 1500px;
+    height: 80vh;
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.logo-section {
+    flex: 1;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.logo-section img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.form-section {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #e57229;
+    border-color: #e57229;
+}
+
+.btn-primary:hover {
+    background-color: #c9561f;
+    border-color: #c9561f;
+}
+
+.alert {
+    margin-top: 10px;
+}
+
+input:disabled {
+    background-color: #e9ecef;
+    opacity: 1;
+}
+
+h2.text-center {
+    font-weight: bold;
+    font-size: 32px;
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+    color: #6c757d;
+    transition: color 0.2s;
+}
+
+.password-toggle:hover {
+    color: #495057;
+}
+
+.password-wrapper input {
+    padding-right: 40px;
+}
+
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+        height: auto;
+        width: 100%;
+        margin: 0;
+    }
+
+    .logo-section,
+    .form-section {
+        flex: none;
+        height: auto;
+    }
+
+    .logo-section {
+        padding: 20px;
+    }
+
+    .form-section {
+        padding: 50px;
+    }
+}
